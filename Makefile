@@ -1,25 +1,25 @@
-NAMESPACE_DEMO_APP      := default
-NAMESPACE_POSTGRES      := default
-NAMESPACE_OTEL_STACK    := monitoring
-NAMESPACE_MINIO         := minio
-NAMESPACE_INGRESS       := ingress-nginx
-NAMESPACE_PROMETHEUS    := monitoring
-NAMESPACE_LOKI          := loki
-NAMESPACE_GRAFANA       := grafana
-NAMESPACE_JAEGER        := jaeger
-NAMESPACE_OTEL_CLUSTER  := monitoring
-NAMESPACE_OTEL_NODE     := monitoring
+NAMESPACE_DEMO_APP          := default
+NAMESPACE_POSTGRES          := default
+NAMESPACE_OTEL_STACK        := monitoring
+NAMESPACE_MINIO             := minio
+NAMESPACE_INGRESS           := ingress-nginx
+NAMESPACE_PROMETHEUS        := monitoring
+NAMESPACE_LOKI              := loki
+NAMESPACE_GRAFANA           := grafana
+NAMESPACE_JAEGER            := jaeger
+NAMESPACE_OTEL_CLUSTER      := monitoring
+NAMESPACE_OTEL_NODE         := monitoring
 
-CHART_DEMO_APP      := ./helm/demo-app/
-CHART_POSTGRES      := ./helm/postgres/
-CHART_MINIO         := ./helm/minio/
-CHART_INGRESS       := ./helm/ingress/
-CHART_PROMETHEUS    := ./helm/prometheus/
-CHART_LOKI          := ./helm/loki/
-CHART_GRAFANA       := ./helm/grafana/
-CHART_JAEGER        := ./helm/jaeger/
-CHART_OTEL_CLUSTER  := ./helm/otel-cluster/
-CHART_OTEL_NODE     := ./helm/otel-node/
+CHART_DEMO_APP          := ./helm/demo-app/
+CHART_POSTGRES          := ./helm/postgres/
+CHART_MINIO             := ./helm/minio/
+CHART_INGRESS           := ./helm/ingress/
+CHART_PROMETHEUS        := ./helm/prometheus/
+CHART_LOKI              := ./helm/loki/
+CHART_GRAFANA           := ./helm/grafana/
+CHART_JAEGER            := ./helm/jaeger/
+CHART_OTEL_CLUSTER      := ./helm/otel-cluster/
+CHART_OTEL_NODE         := ./helm/otel-node/
 
 install: install-postgres install-demo-app install-ingress install-minio install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster
 
@@ -58,7 +58,6 @@ install-loki:
 		--namespace $(NAMESPACE_LOKI) \
 		--create-namespace \
 		--dependency-update
-
 
 install-grafana:
 	helm upgrade --install grafana $(CHART_GRAFANA) \
