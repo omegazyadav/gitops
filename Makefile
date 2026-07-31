@@ -4,6 +4,7 @@ NAMESPACE_OTEL_STACK        := monitoring
 NAMESPACE_MINIO             := minio
 NAMESPACE_INGRESS           := ingress-nginx
 NAMESPACE_PROMETHEUS        := monitoring
+NAMESPACE_VICTORIA_METRICS  := monitoring
 NAMESPACE_LOKI              := loki
 NAMESPACE_GRAFANA           := grafana
 NAMESPACE_JAEGER            := jaeger
@@ -15,13 +16,14 @@ CHART_POSTGRES          := ./helm/postgres/
 CHART_MINIO             := ./helm/minio/
 CHART_INGRESS           := ./helm/ingress/
 CHART_PROMETHEUS        := ./helm/prometheus/
+CHART_VICTORIA_METRICS  := ./helm/victoria-metrics/
 CHART_LOKI              := ./helm/loki/
 CHART_GRAFANA           := ./helm/grafana/
 CHART_JAEGER            := ./helm/jaeger/
 CHART_OTEL_CLUSTER      := ./helm/otel-cluster/
 CHART_OTEL_NODE         := ./helm/otel-node/
 
-install: install-postgres install-demo-app install-ingress install-minio install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster
+install: install-postgres install-demo-app install-ingress install-minio install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster install-victoria-metrics
 
 install-demo-app:
 	helm upgrade --install demo-app $(CHART_DEMO_APP) \
@@ -50,6 +52,12 @@ install-minio:
 install-prometheus:
 	helm upgrade --install prometheus $(CHART_PROMETHEUS) \
 		--namespace $(NAMESPACE_PROMETHEUS) \
+		--create-namespace \
+		--dependency-update
+
+install-victoria-metrics:
+	helm upgrade --install victoria-metrics $(CHART_VICTORIA_METRICS) \
+		--namespace $(NAMESPACE_VICTORIA_METRICS) \
 		--create-namespace \
 		--dependency-update
 

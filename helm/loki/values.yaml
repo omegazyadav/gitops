@@ -47,6 +47,18 @@ loki:
     ruler:
       enable_api: true
 
+    rulerConfig:
+      alertmanager_url: http://vmalertmanager-victoria-metrics-stack.monitoring.svc:9093
+      enable_alertmanager_v2: true
+      storage:
+        type: local
+        local:
+          directory: /rules
+      rule_path: /tmp/loki/scratch
+      ring:
+        kvstore:
+          store: inmemory
+
   resultsCache:
     enabled: false
 

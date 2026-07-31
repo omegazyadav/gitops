@@ -1,0 +1,63 @@
+# Rule group evaluated by the Loki ruler (helm/loki, deploymentMode: SingleBinary).
+# Picked up automatically by the loki-sc-rules sidecar (label "loki_rule") running
+# alongside the singleBinary pod and written into /rules/fake, matching
+# loki.loki.rulerConfig.storage.local.directory (helm/loki/values.yaml).
+#
+# Apply with: kubectl apply -f k8s/loki-ruler-rules.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-ruler-rules
+  namespace: loki
+  labels:
+    loki_rule: "true"
+  annotations:
+    # Loki's ruler local storage requires rules nested per-tenant; with
+    # auth_enabled: false the default tenant is "fake".
+    k8s-sidecar-target-directory: /rules/fake
+data:
+  demo-app-rules.yaml: |
+    groups:
+      - name: demo-app-log-alerts
+        rules:
+          # demo-app's most frequent log line by far is the "/status" health
+          # poll (~every 5s, roughly 2x more frequent than "/health"). Alerting
+          # on it is a reliable, fast-firing way to test the Slack pipeline.
+          - alert: DemoAppFrequentStatusPolling
+            expr: |
+              sum(count_over_time({service_name="demo-app"} | json | path="/status" [1m])) > 5
+            for: 1m
+            labels:
+              severity: info
+              # VMAlertmanagerConfig enforces a matcher requiring alerts to
+              # carry a "namespace" label equal to the config's own namespace
+              # (monitoring). Loki-ruler alerts have no such label by default,
+              # so without this they'd silently fall through to "blackhole"
+              # instead of Slack - and we deliberately keep that enforced
+              # matcher enabled (rather than disabling it stack-wide) so
+              # unrelated infra alerts don't leak into this Slack channel.
+              namespace: monitoring
+              # Explicit app label so the VMAlertmanagerConfig route can match
+              # only these demo-app alerts, not other alerts that also happen
+              # to carry namespace=monitoring (e.g. vmagent/vmstorage infra
+              # alerts like TooManyScrapeErrorsAlert).
+              app: demo-app
+            annotations:
+              summary: "demo-app /status endpoint is being polled frequently"
+              description: "{{ $value }} \"/status\" requests logged by demo-app in the last minute (threshold: 5)."
+
+          # Overall "request handled" volume for demo-app (every path combined).
+          # Each JSON-formatted request log carries msg="request handled"; the
+          # duplicate plain-text GIN access log line is filtered out by the
+          # `| json` parser since it isn't valid JSON.
+          - alert: DemoAppRequestHandledVolume
+            expr: |
+              sum(count_over_time({service_name="demo-app"} | json | msg="request handled" [1m])) > 15
+            for: 1m
+            labels:
+              severity: info
+              namespace: monitoring
+              app: demo-app
+            annotations:
+              summary: "demo-app is logging a high volume of handled requests"
+              description: "{{ $value }} \"request handled\" log lines from demo-app in the last minute (threshold: 15)."
