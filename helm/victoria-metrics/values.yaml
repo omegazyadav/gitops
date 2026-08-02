@@ -1,10 +1,11 @@
+slack:
+  webhookUrl: "slack-webhook-url"
+
 stack:
   enabled: true
   vmsingle:
     enabled: false
 
-  # Disabled: these duplicate the standalone `prometheus` and `grafana` charts
-  # already installed in this stack and fight over hostPorts / dashboards.
   grafana:
     enabled: false
   kube-state-metrics:

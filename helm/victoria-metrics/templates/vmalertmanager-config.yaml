@@ -1,0 +1,8 @@
+# The full VMAlertmanagerConfig manifest is loaded verbatim from
+# files/vmalertmanager-config.yaml via .Files.Get, NOT inlined here, because
+# its Slack templates contain Go-template placeholders (dot-Status,
+# dot-Annotations-dot-foo) meant for Alertmanager to render at
+# notification-send time - Helm's own templating engine must never touch
+# that file's contents (.Files.Get bypasses Sprig/Helm template rendering
+# entirely, unlike helm's "tpl" function).
+{{ .Files.Get "files/vmalertmanager-config.yaml" }}

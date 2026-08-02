@@ -9,6 +9,13 @@ grafana:
       - grafana.localhost
     pathType: Prefix
 
+  grafana.ini:
+    server:
+      # Grafana needs to know its real externally-reachable address to
+      # generate correct absolute links (e.g. /api/short-urls "goto" links).
+      # This kind cluster maps the ingress to host port 9999 (see kind.yaml).
+      root_url: http://grafana.localhost:9999/
+
   persistence:
     enabled: true
     storageClassName: standard

@@ -23,6 +23,9 @@ CHART_JAEGER            := ./helm/jaeger/
 CHART_OTEL_CLUSTER      := ./helm/otel-cluster/
 CHART_OTEL_NODE         := ./helm/otel-node/
 
+create-cluster:
+	kind create cluster --config kind.yaml
+
 install: install-postgres install-demo-app install-ingress install-minio install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster install-victoria-metrics
 
 install-demo-app:

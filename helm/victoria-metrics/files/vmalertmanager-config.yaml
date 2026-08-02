@@ -1,13 +1,3 @@
-# Routes VMAlertmanager (helm/victoria-metrics, vmalertmanager-victoria-metrics-stack)
-# notifications to Slack, using the webhook stored in the
-# "alertmanager-slack-secret" Secret (see k8s/secrets.yaml) via a SecretKeySelector
-# so the webhook URL itself never has to be written into any chart's values.yaml.
-#
-# The VMAlertmanager CR (helm/victoria-metrics/values.yaml) has
-# selectAllByDefault: true, so this VMAlertmanagerConfig is picked up
-# automatically as long as it lives in the same namespace as VMAlertmanager.
-#
-# Apply with: kubectl apply -f k8s/vmalertmanager-config.yaml
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAlertmanagerConfig
 metadata:
@@ -21,13 +11,13 @@ spec:
     group_interval: 5m
     repeat_interval: 12h
     routes:
-      # Only alerts explicitly labeled app=demo-app (our Loki ruler rules,
-      # see k8s/loki-ruler-rules.yaml) go to Slack. Everything else - including
-      # other alerts that happen to carry namespace=monitoring, e.g. vmagent's
-      # own TooManyScrapeErrorsAlert - falls through to blackhole.
       - receiver: slack
         matchers:
           - app = "demo-app"
+        continue: false
+      - receiver: slack
+        matchers:
+          - source = "infra-log-alert"
         continue: false
   receivers:
     - name: blackhole
@@ -40,10 +30,12 @@ spec:
           send_resolved: true
           title: |
             [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.alertname }}
+          title_link: '{{ (index .Alerts 0).Annotations.grafana_url }}'
           text: |
             {{ range .Alerts }}
             *Alert:* {{ .Annotations.summary }}
             *Description:* {{ .Annotations.description }}
             *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+            {{ if .Annotations.grafana_url }}*Graph & logs:* <{{ .Annotations.grafana_url }}|Open in Grafana>{{ end }}
             {{ end }}
           color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
