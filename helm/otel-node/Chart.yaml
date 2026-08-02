@@ -1,0 +1,8 @@
+apiVersion: v2
+name: otel-node
+version: 0.1.0
+dependencies:
+  - name: opentelemetry-collector
+    alias: collector
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+    version: 0.158.0

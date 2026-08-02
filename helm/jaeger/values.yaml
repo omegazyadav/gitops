@@ -1,0 +1,26 @@
+jaeger:
+  allInOne:
+    enabled: true
+
+  jaeger:
+    ingress:
+      enabled: true
+      hosts:
+        - jaeger.localhost
+      pathType: Prefix
+
+  provisionDataStore:
+    cassandra: false
+
+  storage:
+    type: memory
+
+  collector:
+    service:
+      otlp:
+        grpc:
+          name: otlp-grpc
+          port: 4317
+        http:
+          name: otlp-http
+          port: 4318

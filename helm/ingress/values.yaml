@@ -1,0 +1,26 @@
+ingress-nginx:
+  controller:
+    # Use hostPort so traffic flows: Mac:80 → kind-node:80 → nginx pod
+    hostPort:
+      enabled: true
+      ports:
+        http: 80
+        https: 443
+
+    # ClusterIP since traffic enters via hostPort on the pod
+    service:
+      type: ClusterIP
+
+    # Allow scheduling on kind's control-plane node
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+
+    # Only schedule on nodes labelled ingress-ready=true (set in kind.yaml)
+    nodeSelector:
+      ingress-ready: "true"
+
+    # Set as default IngressClass so Ingress resources need no ingressClassName
+    ingressClassResource:
+      default: true

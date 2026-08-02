@@ -1,0 +1,41 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlertmanagerConfig
+metadata:
+  name: slack-alerts
+  namespace: monitoring
+spec:
+  route:
+    receiver: blackhole
+    group_by: ["alertname"]
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 12h
+    routes:
+      - receiver: slack
+        matchers:
+          - app = "demo-app"
+        continue: false
+      - receiver: slack
+        matchers:
+          - source = "infra-log-alert"
+        continue: false
+  receivers:
+    - name: blackhole
+    - name: slack
+      slack_configs:
+        - api_url:
+            name: alertmanager-slack-secret
+            key: slack-api-url
+          channel: "#alert"
+          send_resolved: true
+          title: |
+            [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.alertname }}
+          title_link: '{{ (index .Alerts 0).Annotations.grafana_url }}'
+          text: |
+            {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+            {{ if .Annotations.grafana_url }}*Graph & logs:* <{{ .Annotations.grafana_url }}|Open in Grafana>{{ end }}
+            {{ end }}
+          color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'

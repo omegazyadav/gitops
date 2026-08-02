@@ -1,0 +1,71 @@
+prometheus:
+  enabled: true
+
+  ingress:
+    enabled: true
+    hosts:
+      - prometheus.localhost
+    pathType: Prefix
+
+  prometheusSpec:
+    retention: 3d
+
+    externalLabels:
+      cluster: local
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 800Mi
+      limits:
+        cpu: 500m
+        memory: 2Gi
+
+    # optional: keep local storage simple for dev
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+
+alertmanager:
+  enabled: true
+
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
+
+grafana:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+nodeExporter:
+  enabled: false
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi

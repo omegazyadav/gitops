@@ -54,9 +54,9 @@ podAnnotations:
 
 ingress:
   enabled: true
-  className: ""
+  className: "nginx"
   annotations: {}
-  host: demo.local
+  host: demo-app.localhost
   path: /
   pathType: Prefix
   tls: []

@@ -1,0 +1,151 @@
+grafana:
+  rbac:
+    create: false
+  adminPassword: changeme
+
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.localhost
+    pathType: Prefix
+
+  grafana.ini:
+    server:
+      # Grafana needs to know its real externally-reachable address to
+      # generate correct absolute links (e.g. /api/short-urls "goto" links).
+      # This kind cluster maps the ingress to host port 9999 (see kind.yaml).
+      root_url: http://grafana.localhost:9999/
+
+  persistence:
+    enabled: true
+    storageClassName: standard
+    size: 2Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          uid: prometheus
+          url: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+          isDefault: true
+          access: proxy
+        - name: VictoriaMetrics
+          type: prometheus
+          uid: victoriametrics
+          url: http://vmselect-victoria-metrics-stack.monitoring.svc.cluster.local:8481/select/0/prometheus
+          access: proxy
+          jsonData:
+            httpMethod: POST
+        - name: Loki
+          type: loki
+          uid: loki
+          url: http://loki-gateway.loki.svc.cluster.local
+          access: proxy
+          jsonData:
+            derivedFields:
+              - name: trace_id
+                matcherType: label
+                matcherRegex: trace_id
+                url: "$${__value.raw}"
+                datasourceUid: jaeger
+        - name: Jaeger
+          type: jaeger
+          uid: jaeger
+          url: http://jaeger.monitoring.svc.cluster.local:16686
+          access: proxy
+          jsonData:
+            tracesToLogs:
+              datasourceUid: loki
+              filterByTraceID: true
+              filterBySpanID: false
+              customQuery: true
+              query: '{namespace="default"} | json | trace_id="${__trace.traceId}"'
+  sidecar:
+    dashboards:
+      enabled: true
+      SCProvider: true
+      folder: /var/lib/grafana/dashboards/
+      defaultFolderName: tech
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: grafana
+      resource: both
+      watchMethod: WATCH
+      reloadOnChange: true
+      provider:
+        name: sidecarProvider
+        orgid: "1"
+        disableDelete: false
+        allowUiUpdates: false
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+      searchNamespace: grafana
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'grafana-dashboards-kubernetes'
+          orgId: 1
+          folder: 'k8s'
+          type: file
+          disableDeletion: false
+          editable: true
+          allowUiUpdates: true
+          options:
+            path: /var/lib/grafana/dashboards_provider/grafana-dashboards-kubernetes
+        - name: 'grafana-dashboards-argo'
+          orgId: 1
+          folder: 'argo'
+          type: file
+          disableDeletion: false
+          editable: true
+          allowUiUpdates: true
+          options:
+            path: /var/lib/grafana/dashboards_provider/grafana-dashboards-argo
+
+  dashboards:
+    grafana-dashboards-kubernetes:
+      k8s-system-api-server:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
+        token: ''
+      k8s-system-coredns:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
+        token: ''
+      k8s-views-global:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+        token: ''
+      k8s-views-namespaces:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+        token: ''
+      k8s-views-nodes:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+        token: ''
+      k8s-views-pods:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+        token: ''
+    grafana-dashboards-argo:
+      #workflows:
+      #  url: https://grafana.com/api/dashboards/20348/revisions/1/download
+      #  token: ''
+      cd-application:
+        url: https://raw.githubusercontent.com/adinhodovic/argo-cd-mixin/refs/heads/main/dashboards_out/argo-cd-application-overview.json
+        token: ''
+      cd-operational:
+        url: https://raw.githubusercontent.com/adinhodovic/argo-cd-mixin/refs/heads/main/dashboards_out/argo-cd-operational-overview.json
+        token: ''
+      cd-notifactions:
+        url: https://raw.githubusercontent.com/adinhodovic/argo-cd-mixin/refs/heads/main/dashboards_out/argo-cd-notifications-overview.json
+        token: ''

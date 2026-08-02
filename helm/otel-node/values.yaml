@@ -1,0 +1,107 @@
+collector:
+  # DaemonSet: one pod per node for node-local receivers.
+  # kubeletMetrics and hostMetrics can only see the node they run on;
+  # logsCollection reads /var/log/pods on each node.
+  mode: daemonset
+  fullnameOverride: otel-node
+
+  image:
+    repository: otel/opentelemetry-collector-k8s
+
+  presets:
+    kubernetesAttributes:
+      enabled: true
+      extractAllPodLabels: false
+      extractAllPodAnnotations: false
+    kubeletMetrics:
+      enabled: true
+    hostMetrics:
+      enabled: true
+    logsCollection:
+      enabled: true
+      includeCollectorLogs: false  # prevent log-loop feedback
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+  # Pull-only collector — no push-based signal ingestion.
+  ports:
+    otlp:
+      enabled: false
+    otlp-http:
+      enabled: false
+    jaeger-compact:
+      enabled: false
+    jaeger-thrift:
+      enabled: false
+    jaeger-grpc:
+      enabled: false
+    zipkin:
+      enabled: false
+
+  config:
+    extensions:
+      health_check:
+        endpoint: ${env:MY_POD_IP}:13133
+
+    receivers:
+      otlp: null  # nulled to prevent "receiver declared but not used" error
+      kubeletstats:
+        insecure_skip_verify: true  # kind kubelet cert has no IP SAN
+
+    processors:
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+      batch: {}
+      resource:
+        attributes:
+          - key: environment
+            value: dev
+            action: insert
+          - key: k8s.cluster.name
+            value: test-cluster
+            action: insert
+
+    exporters:
+      otlphttp/prometheus:
+        endpoint: http://prometheus-server.monitoring.svc.cluster.local/api/v1/otlp
+        tls:
+          insecure: true
+      otlphttp/loki:
+        endpoint: http://loki-gateway.loki.svc.cluster.local/otlp
+        tls:
+          insecure: true
+
+    service:
+      extensions:
+        - health_check
+      pipelines:
+        traces: null
+        metrics:
+          receivers:
+            - kubeletstats  # added by kubeletMetrics preset
+            - hostmetrics   # added by hostMetrics preset
+          processors:
+            - memory_limiter
+            - k8sattributes
+            - resource
+            - batch
+          exporters:
+            - otlphttp/prometheus
+        logs:
+          receivers:
+            - filelog       # added by logsCollection preset
+          processors:
+            - memory_limiter
+            - k8sattributes
+            - resource
+            - batch
+          exporters:
+            - otlphttp/loki

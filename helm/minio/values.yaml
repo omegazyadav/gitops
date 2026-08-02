@@ -1,0 +1,38 @@
+minio:
+  mode: standalone
+  persistence:
+    size: 10Gi
+  resources:
+    requests:
+      memory: 1Gi
+  rootUser: "minioadmin"
+  rootPassword: "minioadmin"
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: true
+    hosts:
+      - minio.localhost
+    path: /
+    pathType: Prefix
+
+  consoleIngress:
+    enabled: true
+    hosts:
+      - minio-console.localhost
+    path: /
+    pathType: Prefix
+
+  buckets:
+    - name: loki
+      policy: none
+      purge: false
+    - name: thanos
+      policy: none
+      purge: false
+
+  users:
+    - accessKey: loki
+      secretKey: loki-secret
+      policy: readwrite

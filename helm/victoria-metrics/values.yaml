@@ -1,0 +1,96 @@
+slack:
+  webhookUrl: "slack-webhook-url"
+
+stack:
+  enabled: true
+  vmsingle:
+    enabled: false
+
+  grafana:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  alertmanager:
+    enabled: true
+    spec:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 30m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+      storage:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 1Gi
+
+  victoria-metrics-operator:
+    operator:
+      disable_prometheus_converter: false
+      webhook:
+        enabled: true
+      cleanupCRD:
+        enabled: true
+        image:
+          repository: registry.k8s.io/kubectl
+          tag: "v1.33.0"
+          pullPolicy: IfNotPresent
+  vmalert:
+    enabled: true
+    spec:
+      notifiers:
+        - url: http://vmalertmanager-victoria-metrics-stack.monitoring.svc:9093
+
+  vmcluster:
+    enabled: true
+    spec:
+      retentionPeriod: "7d"
+      replicationFactor: 1
+      vminsert:
+        replicaCount: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      vmselect:
+        replicaCount: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        storage:                    # vmselect uses this for cache
+          volumeClaimTemplate:
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 1Gi
+      vmstorage:
+        replicaCount: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        storage:                    # vmstorage uses this for data
+          volumeClaimTemplate:
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 5Gi
