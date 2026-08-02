@@ -16,10 +16,33 @@ grafana:
       # This kind cluster maps the ingress to host port 9999 (see kind.yaml).
       root_url: http://grafana.localhost:9999/
 
+    auth.github:
+      enabled: true
+      allow_sign_up: true
+      client_id: $__file{/etc/secrets/github-oauth/client_id}
+      client_secret: $__file{/etc/secrets/github-oauth/client_secret}
+      scopes: user:email,read:org
+      auth_url: https://github.com/login/oauth/authorize
+      token_url: https://github.com/login/oauth/access_token
+      api_url: https://api.github.com/user
+      # Only members of the cloudhonk GitHub org may sign in.
+      allowed_organizations: cloudhonk
+
   persistence:
     enabled: true
     storageClassName: standard
     size: 2Gi
+
+  # GitHub OAuth client_id/client_secret are NOT stored here or anywhere in
+  # git. They're read from files mounted from a Secret named
+  # "grafana-github-oauth", created out-of-band (see README) the same way
+  # alertmanager-slack-secret is - kubectl-applied once, never templated.
+  extraSecretMounts:
+    - name: github-oauth
+      secretName: grafana-github-oauth
+      defaultMode: 0440
+      mountPath: /etc/secrets/github-oauth
+      readOnly: true
 
   resources:
     requests:

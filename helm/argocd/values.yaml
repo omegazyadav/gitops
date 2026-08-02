@@ -1,0 +1,16 @@
+argo-cd:
+  configs:
+    params:
+      # Serve plain HTTP internally; our existing nginx ingress
+      # (helm/ingress) terminates at the browser without TLS in this local
+      # kind cluster, so passthrough/TLS setup is unnecessary here.
+      server.insecure: true
+
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hostname: argocd.localhost
+
+    extraArgs:
+      - --insecure

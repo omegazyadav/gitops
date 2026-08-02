@@ -60,30 +60,68 @@ kubectl logs -l app=note-app
 
 ## Secrets Management
 
-Secrets are managed with [SOPS](https://github.com/getsops/sops) + AWS KMS so encrypted secrets can be safely committed to git.
+Secrets are managed with [SOPS](https://github.com/getsops/sops) + [age](https://github.com/FiloSottile/age),
+encrypted against your **existing SSH key** (RSA or ed25519 - no separate
+age keypair needed, `age` supports SSH keys as recipients natively). This
+lets encrypted secret manifests be safely committed to git in `secrets/`.
 
-```bash
-# Install SOPS
-brew install sops
-
-# Encrypt secret
-sops --encrypt secret.yaml > secret.enc.yaml
-
-# Deploy (decrypt on the fly)
-sops --decrypt secret.enc.yaml | kubectl apply -f -
-
-# Edit encrypted secret
-sops secret.enc.yaml
-```
-
-Configure your KMS key in `.sops.yaml`:
+Recipients are configured in `~/.sops.yaml` (kept outside the repo,
+per-machine/per-user - SOPS automatically discovers it by walking up from
+the current directory, so no repo-local config is needed):
 ```yaml
 creation_rules:
-  - path_regex: .*secret.*\.yaml$
-    kms: arn:aws:kms:<region>:<account-id>:key/<key-id>
+  - path_regex: secrets/.*\.enc\.yaml$
+    age: >-
+      ssh-rsa AAAAB3N... your-username
 ```
 
-> Never commit `secret.yaml`. Add it to `.gitignore`.
+> Each contributor needs their own `~/.sops.yaml` entry (their own SSH
+> public key as recipient) to encrypt/decrypt secrets on their machine. If
+> multiple people need access to the same secret, list multiple recipients
+> (one per line, comma-separated) in the `age:` field.
+
+### Day-to-day usage
+
+```bash
+# Apply all encrypted secrets to the cluster (also run automatically by
+# `make install` / `make install-grafana`)
+make apply-secrets
+
+# Edit an existing encrypted secret (opens $EDITOR with decrypted content,
+# re-encrypts automatically on save)
+make edit-secret FILE=secrets/grafana-github-oauth.enc.yaml
+
+# Create a brand new encrypted secret from scratch
+cat > secrets/my-secret.enc.yaml <<'EOF'
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+  namespace: my-namespace
+type: Opaque
+stringData:
+  key: value
+EOF
+sops -e -i secrets/my-secret.enc.yaml
+```
+
+If your SSH key isn't `~/.ssh/id_rsa`, override it:
+```bash
+make apply-secrets SOPS_AGE_SSH_PRIVATE_KEY_FILE=~/.ssh/id_ed25519
+```
+
+> Only the files under `secrets/*.enc.yaml` (already SOPS-encrypted) should
+> ever be committed. Never commit a decrypted secret manifest.
+
+Currently-managed secrets:
+| Secret | Used by | Purpose |
+|---|---|---|
+| `secrets/grafana-github-oauth.enc.yaml` | `helm/grafana` | GitHub OAuth `client_id`/`client_secret` for Grafana login (see `helm/grafana/README.md`) |
+
+Note: `alertmanager-slack-secret` (used by `helm/victoria-metrics`) is
+currently applied via `helm upgrade ... --set slack.webhookUrl=...` rather
+than a SOPS-encrypted file - see `helm/victoria-metrics/README.md` if present,
+or migrate it into `secrets/` using the same pattern above.
 
 ---
 

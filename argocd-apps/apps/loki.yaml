@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+  annotations:
+    # Controls ordering only when multiple apps sync at once (e.g. the
+    # first time the whole stack is bootstrapped) - higher-wave apps wait
+    # for lower-wave ones. Each app is still fully independent: you can
+    # sync, pause, or delete this Application on its own at any time
+    # without affecting the others (see README in argocd-apps/).
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/omegazyadav/otel-demo.git
+    targetRevision: feat/argo-cd
+    path: helm/loki
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: loki
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # avoids kubectl's 262144-byte last-applied-configuration
+      # annotation limit (hit by large CRDs/dashboard ConfigMaps).
+      - ServerSideApply=true
