@@ -14,7 +14,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
-    targetRevision: feat/argo-cd
+    targetRevision: main
     path: helm/jaeger
     helm:
       valueFiles:
