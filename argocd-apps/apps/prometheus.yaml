@@ -4,11 +4,6 @@ metadata:
   name: prometheus
   namespace: argocd
   annotations:
-    # Controls ordering only when multiple apps sync at once (e.g. the
-    # first time the whole stack is bootstrapped) - higher-wave apps wait
-    # for lower-wave ones. Each app is still fully independent: you can
-    # sync, pause, or delete this Application on its own at any time
-    # without affecting the others (see README in argocd-apps/).
     argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
@@ -28,3 +23,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

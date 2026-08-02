@@ -34,6 +34,9 @@ SECRETS_DIR                    := ./secrets
 create-cluster:
 	kind create cluster --config kind.yaml
 
+delete-cluster:
+	kind delete cluster --name k8s-labs
+
 install: install-postgres install-demo-app install-ingress install-minio install-secrets install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster install-victoria-metrics
 
 # Decrypts every secrets/*.enc.yaml (SOPS, encrypted against your SSH public
