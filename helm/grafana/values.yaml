@@ -27,7 +27,7 @@ grafana:
       api_url: https://api.github.com/user
       # Only members of the cloudhonk GitHub org may sign in.
       allowed_organizations: cloudhonk
-      role_attribute_path: "'Admin'"
+      role_attribute_path: "[login] && 'Admin' || 'Viewer'"
 
   persistence:
     enabled: true
