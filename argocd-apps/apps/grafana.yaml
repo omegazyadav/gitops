@@ -4,11 +4,6 @@ metadata:
   name: grafana
   namespace: argocd
   annotations:
-    # Controls ordering only when multiple apps sync at once (e.g. the
-    # first time the whole stack is bootstrapped) - higher-wave apps wait
-    # for lower-wave ones. Each app is still fully independent: you can
-    # sync, pause, or delete this Application on its own at any time
-    # without affecting the others (see README in argocd-apps/).
     argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
@@ -19,9 +14,6 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-        # SOPS-encrypted; decrypted on the fly by the repo-server's
-        # helm-secrets wrapper (see helm/argocd/values.yaml). No separate
-        # kubectl apply needed.
         - secrets://secrets.enc.yaml
   destination:
     server: https://kubernetes.default.svc
@@ -32,6 +24,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      # avoids kubectl's 262144-byte last-applied-configuration
-      # annotation limit (hit by large CRDs/dashboard ConfigMaps).
       - ServerSideApply=true
