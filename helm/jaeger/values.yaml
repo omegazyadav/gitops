@@ -5,6 +5,7 @@ jaeger:
   jaeger:
     ingress:
       enabled: true
+      ingressClassName: nginx
       hosts:
         - jaeger.localhost
       pathType: Prefix
