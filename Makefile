@@ -25,7 +25,7 @@ CHART_OTEL_CLUSTER      := ./helm/otel-cluster/
 CHART_OTEL_NODE         := ./helm/otel-node/
 CHART_ARGOCD            := ./helm/argocd/
 
-SOPS_AGE_SSH_PRIVATE_KEY_FILE ?= ~/.ssh/id_rsa
+SOPS_AGE_SSH_PRIVATE_KEY_FILE ?= $(HOME)/.ssh/id_rsa
 
 create-cluster:
 	kind create cluster --config kind.yaml
@@ -37,7 +37,6 @@ install: install-postgres install-demo-app install-ingress install-minio install
 
 edit-secret:
 	SOPS_AGE_SSH_PRIVATE_KEY_FILE=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) sops $(FILE)
-
 
 install-demo-app:
 	helm upgrade --install demo-app $(CHART_DEMO_APP) \
