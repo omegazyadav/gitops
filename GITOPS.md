@@ -1,14 +1,14 @@
-# argocd-apps
+# GitOps entrypoint
 
 GitOps entrypoint for ArgoCD (installed via `helm/argocd`, see `make install-argocd`).
 
 ## Structure
 
 - `root.yaml` — the "app of apps" root `Application`. It watches this
-  directory's `apps/` folder and creates a real ArgoCD `Application` for
+  repo's `apps/` folder and creates a real ArgoCD `Application` for
   every manifest found there. Apply this once to bootstrap everything else:
   ```
-  kubectl apply -f argocd-apps/root.yaml
+  kubectl apply -f root.yaml
   ```
 - `apps/<chart>.yaml` — one `Application` per Helm chart under `helm/`.
   Each points at `helm/<chart>` on the `main` branch and deploys it to its

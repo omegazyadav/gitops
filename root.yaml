@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: argocd-apps/apps
+    path: apps
     directory:
       recurse: false
   destination:
