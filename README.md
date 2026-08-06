@@ -60,20 +60,6 @@ To add a new chart: create `helm/<new-chart>/`, copy an existing file in `apps/`
 
 `helm/demo-app` gets an additional `Gateway` + `VirtualService` (disabled by default via `istio.enabled: false`, turned on for `demo-app` in `apps/demo-app.yaml`) routing the **same host** (`demo-app.localhost`) the nginx `Ingress` already uses, to the same backend `Service`. The two paths are distinguished only by port.
 
-Because `kind.yaml` port mappings changed, recreate the cluster to pick them up:
-```bash
-make delete-cluster
-make create-cluster
-make install-argocd
-kubectl apply -f root.yaml
-```
-
-Then test both paths side by side (same host, different port):
-```bash
-curl http://demo-app.localhost:9999/status  # via ingress-nginx
-curl http://demo-app.localhost:8080/status  # via Istio gateway
-```
-
 ## Further docs
 
 - `helm/<chart>/README.md` — per-component configuration details
