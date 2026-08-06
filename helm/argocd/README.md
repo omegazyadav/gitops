@@ -21,8 +21,8 @@ After this chart is installed (`make install-argocd`), apply the root
 kubectl apply -f root.yaml
 ```
 
-See `../../GITOPS.md` for how each chart's Application is
-structured and how to sync/pause/delete them individually.
+See the root `../../README.md#gitops-structure` for how each chart's
+Application is structured and how to sync/pause/delete them individually.
 
 ## Access
 
