@@ -14,3 +14,12 @@ nodes:
         hostPort: 9443
         listenAddress: "127.0.0.1"
         protocol: TCP
+      # Istio ingress gateway (kept separate from ingress-nginx's 9999/9443)
+      - containerPort: 30080
+        hostPort: 8080
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 30443
+        hostPort: 8443
+        listenAddress: "127.0.0.1"
+        protocol: TCP

@@ -1,25 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: demo-app
+  name: istio-base
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
-    repoURL: https://github.com/omegazyadav/otel-demo.git
-    targetRevision: main
-    path: helm/demo-app
+    chart: base
+    repoURL: https://istio-release.storage.googleapis.com/charts
+    targetRevision: 1.27.9
     helm:
-      valueFiles:
-        - values.yaml
-      values: |
-        istio:
-          enabled: true
+      releaseName: istio-base
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: istio-system
   syncPolicy:
     automated:
       prune: true
