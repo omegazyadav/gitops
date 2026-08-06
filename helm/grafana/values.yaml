@@ -1,8 +1,3 @@
-# GitHub OAuth credentials for templates/github-oauth-secret.yaml. Left
-# empty here on purpose - real values come from secrets.enc.yaml (SOPS
-# -encrypted, decrypted on the fly by ArgoCD's helm-secrets-wrapped Helm,
-# or locally via `helm secrets template/upgrade`). See the root README's
-# Secrets Management section and helm/grafana/README.md.
 githubOAuth:
   clientId: ""
   clientSecret: ""
@@ -20,9 +15,6 @@ grafana:
 
   grafana.ini:
     server:
-      # Grafana needs to know its real externally-reachable address to
-      # generate correct absolute links (e.g. /api/short-urls "goto" links).
-      # This kind cluster maps the ingress to host port 9999 (see kind.yaml).
       root_url: http://grafana.localhost:9999/
 
     auth.github:
@@ -34,7 +26,6 @@ grafana:
       auth_url: https://github.com/login/oauth/authorize
       token_url: https://github.com/login/oauth/access_token
       api_url: https://api.github.com/user
-      # Only members of the cloudhonk GitHub org may sign in.
       allowed_organizations: cloudhonk
       role_attribute_path: "[login] && 'Admin' || 'Viewer'"
 
@@ -43,11 +34,6 @@ grafana:
     storageClassName: standard
     size: 2Gi
 
-  # GitHub OAuth client_id/client_secret are NOT stored here or anywhere in
-  # plaintext in git. They're rendered into a Secret named
-  # "grafana-github-oauth" by templates/github-oauth-secret.yaml, sourced
-  # from .Values.githubOAuth (see secrets.enc.yaml, SOPS-encrypted, and the
-  # root README's Secrets Management section).
   extraSecretMounts:
     - name: github-oauth
       secretName: grafana-github-oauth

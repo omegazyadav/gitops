@@ -1,7 +1,4 @@
 collector:
-  # DaemonSet: one pod per node for node-local receivers.
-  # kubeletMetrics and hostMetrics can only see the node they run on;
-  # logsCollection reads /var/log/pods on each node.
   mode: daemonset
   fullnameOverride: otel-node
 
@@ -19,7 +16,7 @@ collector:
       enabled: true
     logsCollection:
       enabled: true
-      includeCollectorLogs: false  # prevent log-loop feedback
+      includeCollectorLogs: false
 
   resources:
     requests:
@@ -29,7 +26,6 @@ collector:
       cpu: 300m
       memory: 512Mi
 
-  # Pull-only collector — no push-based signal ingestion.
   ports:
     otlp:
       enabled: false
@@ -50,9 +46,9 @@ collector:
         endpoint: ${env:MY_POD_IP}:13133
 
     receivers:
-      otlp: null  # nulled to prevent "receiver declared but not used" error
+      otlp: null
       kubeletstats:
-        insecure_skip_verify: true  # kind kubelet cert has no IP SAN
+        insecure_skip_verify: true
 
     processors:
       memory_limiter:
@@ -86,8 +82,8 @@ collector:
         traces: null
         metrics:
           receivers:
-            - kubeletstats  # added by kubeletMetrics preset
-            - hostmetrics   # added by hostMetrics preset
+            - kubeletstats
+            - hostmetrics
           processors:
             - memory_limiter
             - k8sattributes
@@ -97,7 +93,7 @@ collector:
             - otlphttp/prometheus
         logs:
           receivers:
-            - filelog       # added by logsCollection preset
+            - filelog
           processors:
             - memory_limiter
             - k8sattributes

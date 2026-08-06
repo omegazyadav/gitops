@@ -25,9 +25,6 @@ CHART_OTEL_CLUSTER      := ./helm/otel-cluster/
 CHART_OTEL_NODE         := ./helm/otel-node/
 CHART_ARGOCD            := ./helm/argocd/
 
-# SSH key used as the sops/age recipient for helm/*/secrets.enc.yaml.
-# Override on the command line if your key lives elsewhere, e.g.:
-#   make install-grafana SOPS_AGE_SSH_PRIVATE_KEY_FILE=~/.ssh/id_ed25519
 SOPS_AGE_SSH_PRIVATE_KEY_FILE ?= ~/.ssh/id_rsa
 
 create-cluster:
@@ -38,8 +35,6 @@ delete-cluster:
 
 install: install-postgres install-demo-app install-ingress install-minio install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster install-victoria-metrics
 
-# Edit an encrypted secret in place (opens $EDITOR with decrypted content,
-# re-encrypts on save). Usage: make edit-secret FILE=helm/grafana/secrets.enc.yaml
 edit-secret:
 	SOPS_AGE_SSH_PRIVATE_KEY_FILE=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) sops $(FILE)
 

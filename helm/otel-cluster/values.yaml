@@ -6,8 +6,6 @@ collector:
   image:
     repository: otel/opentelemetry-collector-k8s
 
-  # clusterMetrics: adds k8sclusterreceiver (cluster-level kube-state-like metrics).
-  # kubernetesAttributes: enriches all signals with pod/namespace/node metadata.
   presets:
     kubernetesAttributes:
       enabled: true
@@ -16,8 +14,6 @@ collector:
     clusterMetrics:
       enabled: true
 
-  # Extra RBAC rules needed by prometheus/apps receiver for pod auto-discovery.
-  # The presets create the ClusterRole; these rules are appended to it.
   clusterRole:
     rules:
       - apiGroups: [""]
@@ -48,10 +44,9 @@ collector:
         endpoint: ${env:MY_POD_IP}:13133
 
     receivers:
-      # null out chart defaults not used in any pipeline
       jaeger: null
       zipkin: null
-      prometheus: null  # self-monitoring scrape; not wired into any pipeline
+      prometheus: null
 
       otlp:
         protocols:
@@ -67,25 +62,20 @@ collector:
               kubernetes_sd_configs:
                 - role: pod
               relabel_configs:
-                # only scrape pods with prometheus.io/scrape: "true"
                 - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
                   action: keep
                   regex: "true"
-                # honour prometheus.io/path annotation, default is /metrics
                 - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
                   action: replace
                   target_label: __metrics_path__
                   regex: (.+)
-                # rewrite host:port using prometheus.io/port annotation
                 - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
                   action: replace
                   regex: ([^:]+)(?::\d+)?;(\d+)
                   replacement: $1:$2
                   target_label: __address__
-                # carry all pod labels through as metric labels
                 - action: labelmap
                   regex: __meta_kubernetes_pod_label_(.+)
-                # add namespace and pod name labels
                 - source_labels: [__meta_kubernetes_namespace]
                   target_label: namespace
                 - source_labels: [__meta_kubernetes_pod_name]
@@ -120,7 +110,7 @@ collector:
       extensions:
         - health_check
       pipelines:
-        logs: null  # remove chart default logs→debug pipeline
+        logs: null
         traces:
           receivers:
             - otlp
@@ -134,8 +124,8 @@ collector:
         metrics:
           receivers:
             - otlp
-            - k8s_cluster       # added by clusterMetrics preset
-            - prometheus/apps   # pod annotation-based scrape discovery
+            - k8s_cluster
+            - prometheus/apps
           processors:
             - memory_limiter
             - k8sattributes
