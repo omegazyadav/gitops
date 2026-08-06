@@ -12,6 +12,7 @@ minio:
 
   ingress:
     enabled: true
+    ingressClassName: nginx
     hosts:
       - minio.localhost
     path: /
@@ -19,6 +20,7 @@ minio:
 
   consoleIngress:
     enabled: true
+    ingressClassName: nginx
     hosts:
       - minio-console.localhost
     path: /
