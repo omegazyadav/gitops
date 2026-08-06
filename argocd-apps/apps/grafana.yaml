@@ -19,6 +19,10 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+        # SOPS-encrypted; decrypted on the fly by the repo-server's
+        # helm-secrets wrapper (see helm/argocd/values.yaml). No separate
+        # kubectl apply needed.
+        - secrets://secrets.enc.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: grafana

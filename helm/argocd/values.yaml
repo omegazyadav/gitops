@@ -5,6 +5,12 @@ argo-cd:
       # (helm/ingress) terminates at the browser without TLS in this local
       # kind cluster, so passthrough/TLS setup is unnecessary here.
       server.insecure: true
+    cm:
+      # Allows Application `source.helm.valueFiles` entries prefixed with
+      # `secrets://` (used to point at SOPS-encrypted values files, e.g.
+      # helm/grafana/secrets.enc.yaml). Decryption itself is handled by the
+      # helm-secrets wrapper installed into the repo-server below.
+      helm.valuesFileSchemes: "secrets, https"
 
   server:
     ingress:
@@ -14,3 +20,78 @@ argo-cd:
 
     extraArgs:
       - --insecure
+
+  # Wires up SOPS decryption inline with Helm, so ArgoCD can render charts
+  # that reference SOPS-encrypted values files (e.g. secrets://secrets.enc.yaml)
+  # without any separate `kubectl apply` step. This works by replacing the
+  # `helm` binary the repo-server calls with the helm-secrets wrapper script,
+  # which transparently decrypts any `secrets.yaml`/`*.enc.yaml` value file
+  # via `sops` before invoking real Helm underneath.
+  # See: https://github.com/jkroepke/helm-secrets
+  repoServer:
+    env:
+      - name: HELM_PLUGINS
+        value: /custom-tools/helm-plugins/
+      - name: HELM_SECRETS_SOPS_PATH
+        value: /custom-tools/sops
+      - name: HELM_SECRETS_KUBECTL_PATH
+        value: /usr/local/bin/kubectl
+      - name: HELM_SECRETS_HELM_PATH
+        value: /usr/local/bin/helm.bin
+      - name: HELM_SECRETS_BACKEND
+        value: sops
+      - name: HELM_SECRETS_WRAPPER_ENABLED
+        value: "true"
+      - name: HELM_SECRETS_DECRYPT_SECRETS_IN_TMP_DIR
+        value: "true"
+      # SSH private key used as the sops/age identity to decrypt
+      # secrets/*.enc.yaml and helm/*/secrets.enc.yaml. Mounted from the
+      # argocd-repo-server-age-key Secret - see the root README's Secrets
+      # Management section for how to create it (one-time, out-of-band -
+      # this is the one secret that can't itself be sops-encrypted, since
+      # it *is* the decryption key).
+      - name: SOPS_AGE_SSH_PRIVATE_KEY_FILE
+        value: /age-key/id_rsa
+
+    volumes:
+      - name: custom-tools
+        emptyDir: {}
+      - name: age-key
+        secret:
+          secretName: argocd-repo-server-age-key
+          defaultMode: 0400
+
+    volumeMounts:
+      - name: custom-tools
+        mountPath: /custom-tools
+      - name: custom-tools
+        mountPath: /usr/local/bin/helm
+        subPath: helm
+      - name: custom-tools
+        mountPath: /usr/local/bin/helm.bin
+        subPath: helm.bin
+      - name: age-key
+        mountPath: /age-key
+        readOnly: true
+
+    initContainers:
+      - name: download-helm-secrets
+        image: alpine/helm:3.16.4
+        imagePullPolicy: IfNotPresent
+        command: [sh, -ec]
+        env:
+          - name: HELM_SECRETS_VERSION
+            value: "4.6.2"
+          - name: SOPS_VERSION
+            value: "3.9.4"
+        args:
+          - |
+            mkdir -p /custom-tools/helm-plugins
+            wget -qO /custom-tools/sops "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
+            wget -qO- "https://github.com/jkroepke/helm-secrets/releases/download/v${HELM_SECRETS_VERSION}/helm-secrets.tar.gz" | tar -C /custom-tools/helm-plugins -xzf-
+            cp -fp "$(which helm)" /custom-tools/helm.bin
+            cp /custom-tools/helm-plugins/helm-secrets/scripts/wrapper/helm.sh /custom-tools/helm
+            chmod +x /custom-tools/sops /custom-tools/helm /custom-tools/helm.bin
+        volumeMounts:
+          - name: custom-tools
+            mountPath: /custom-tools

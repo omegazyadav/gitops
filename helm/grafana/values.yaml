@@ -1,3 +1,12 @@
+# GitHub OAuth credentials for templates/github-oauth-secret.yaml. Left
+# empty here on purpose - real values come from secrets.enc.yaml (SOPS
+# -encrypted, decrypted on the fly by ArgoCD's helm-secrets-wrapped Helm,
+# or locally via `helm secrets template/upgrade`). See the root README's
+# Secrets Management section and helm/grafana/README.md.
+githubOAuth:
+  clientId: ""
+  clientSecret: ""
+
 grafana:
   rbac:
     create: false
@@ -35,9 +44,10 @@ grafana:
     size: 2Gi
 
   # GitHub OAuth client_id/client_secret are NOT stored here or anywhere in
-  # git. They're read from files mounted from a Secret named
-  # "grafana-github-oauth", created out-of-band (see README) the same way
-  # alertmanager-slack-secret is - kubectl-applied once, never templated.
+  # plaintext in git. They're rendered into a Secret named
+  # "grafana-github-oauth" by templates/github-oauth-secret.yaml, sourced
+  # from .Values.githubOAuth (see secrets.enc.yaml, SOPS-encrypted, and the
+  # root README's Secrets Management section).
   extraSecretMounts:
     - name: github-oauth
       secretName: grafana-github-oauth

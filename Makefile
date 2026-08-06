@@ -25,11 +25,10 @@ CHART_OTEL_CLUSTER      := ./helm/otel-cluster/
 CHART_OTEL_NODE         := ./helm/otel-node/
 CHART_ARGOCD            := ./helm/argocd/
 
-# SSH key used as the sops/age recipient for secrets/*.enc.yaml. Override
-# on the command line if your key lives elsewhere, e.g.:
-#   make apply-secrets SOPS_AGE_SSH_PRIVATE_KEY_FILE=~/.ssh/id_ed25519
+# SSH key used as the sops/age recipient for helm/*/secrets.enc.yaml.
+# Override on the command line if your key lives elsewhere, e.g.:
+#   make install-grafana SOPS_AGE_SSH_PRIVATE_KEY_FILE=~/.ssh/id_ed25519
 SOPS_AGE_SSH_PRIVATE_KEY_FILE ?= ~/.ssh/id_rsa
-SECRETS_DIR                    := ./secrets
 
 create-cluster:
 	kind create cluster --config kind.yaml
@@ -37,26 +36,10 @@ create-cluster:
 delete-cluster:
 	kind delete cluster --name k8s-labs
 
-install: install-postgres install-demo-app install-ingress install-minio install-secrets install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster install-victoria-metrics
-
-# Decrypts every secrets/*.enc.yaml (SOPS, encrypted against your SSH public
-# key) and applies it to the cluster. Plaintext is never written to disk -
-# each file is piped straight from `sops -d` into `kubectl apply -f -`.
-# Run this before/alongside install-grafana, since that chart references a
-# secret created this way (grafana-github-oauth).
-# Namespaces referenced by these secrets are created first (idempotently)
-# since kubectl apply requires the target namespace to already exist.
-apply-secrets:
-	@kubectl create namespace $(NAMESPACE_GRAFANA) --dry-run=client -o yaml | kubectl apply -f -
-	@for f in $(SECRETS_DIR)/*.enc.yaml; do \
-		echo "Applying $$f"; \
-		SOPS_AGE_SSH_PRIVATE_KEY_FILE=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) sops -d "$$f" | kubectl apply -f -; \
-	done
-
-install-secrets: apply-secrets
+install: install-postgres install-demo-app install-ingress install-minio install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster install-victoria-metrics
 
 # Edit an encrypted secret in place (opens $EDITOR with decrypted content,
-# re-encrypts on save). Usage: make edit-secret FILE=secrets/foo.enc.yaml
+# re-encrypts on save). Usage: make edit-secret FILE=helm/grafana/secrets.enc.yaml
 edit-secret:
 	SOPS_AGE_SSH_PRIVATE_KEY_FILE=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) sops $(FILE)
 
@@ -103,11 +86,13 @@ install-loki:
 		--create-namespace \
 		--dependency-update
 
-install-grafana: apply-secrets
-	helm upgrade --install grafana $(CHART_GRAFANA) \
+install-grafana:
+	SOPS_AGE_SSH_PRIVATE_KEY_FILE=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) helm secrets upgrade --install grafana $(CHART_GRAFANA) \
 		--namespace $(NAMESPACE_GRAFANA) \
 		--create-namespace \
-		--dependency-update
+		--dependency-update \
+		-f $(CHART_GRAFANA)values.yaml \
+		-f $(CHART_GRAFANA)secrets.enc.yaml
 
 install-jaeger:
 	helm upgrade --install jaeger $(CHART_JAEGER) \
