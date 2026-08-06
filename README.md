@@ -11,7 +11,7 @@ A local Kubernetes observability stack (kind), deployed and managed via ArgoCD G
 | Tracing | Jaeger |
 | Collection | OpenTelemetry Collector (cluster + node) |
 | Dashboards | Grafana |
-| Ingress | ingress-nginx |
+| Ingress | ingress-nginx, Istio (`istio-base`/`istiod`/`istio-ingressgateway`, learning setup) |
 | Storage | MinIO, Postgres |
 | Demo workload | `helm/demo-app` — OTel-instrumented Go service |
 | GitOps | ArgoCD |
@@ -53,6 +53,12 @@ argocd app delete grafana                         # remove it entirely
 ```
 
 To add a new chart: create `helm/<new-chart>/`, copy an existing file in `apps/` to `apps/<new-chart>.yaml` (update `metadata.name`, `spec.source.path`, `spec.destination.namespace`), then commit and push.
+
+## Istio (learning setup, runs alongside ingress-nginx)
+
+`apps/istio-base.yaml`, `apps/istiod.yaml`, and `apps/istio-ingressgateway.yaml` install the upstream Istio Helm charts into `istio-system` — nginx keeps handling its existing routes untouched. The Istio ingress gateway is exposed via NodePort `30080`/`30443`, mapped in `kind.yaml` to host ports `8080`/`8443` (separate from nginx's `9999`/`9443`).
+
+`helm/demo-app` gets an additional `Gateway` + `VirtualService` (disabled by default via `istio.enabled: false`, turned on for `demo-app` in `apps/demo-app.yaml`) routing the **same host** (`demo-app.localhost`) the nginx `Ingress` already uses, to the same backend `Service`. The two paths are distinguished only by port.
 
 ## Further docs
 

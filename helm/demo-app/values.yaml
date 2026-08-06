@@ -61,6 +61,14 @@ ingress:
   pathType: Prefix
   tls: []
 
+# Parallel Istio Gateway + VirtualService, routing to the same Service and
+# same host as the nginx Ingress above (differentiate by port: 9999 = nginx,
+# 8080 = Istio gateway). Kept disabled by default so nginx remains the sole
+# path unless explicitly turned on (see apps/demo-app.yaml for the override).
+istio:
+  enabled: false
+  host: demo-app.localhost
+
 hpa:
   enabled: false
   minReplicas: 1
