@@ -21,7 +21,6 @@ prometheus:
         cpu: 500m
         memory: 2Gi
 
-    # optional: keep local storage simple for dev
     storageSpec:
       volumeClaimTemplate:
         spec:

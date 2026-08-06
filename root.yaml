@@ -3,10 +3,6 @@ kind: Application
 metadata:
   name: otel-stack
   namespace: argocd
-  # This is the root "app of apps": it watches argocd-apps/apps/ and turns
-  # every Application manifest found there into a real ArgoCD Application,
-  # which in turn manages the corresponding Helm chart under helm/<name>/.
-  # Adding a new service = adding one file to argocd-apps/apps/ + committing.
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -14,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: argocd-apps/apps
+    path: apps
     directory:
       recurse: false
   destination:

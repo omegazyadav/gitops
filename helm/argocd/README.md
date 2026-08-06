@@ -2,7 +2,7 @@
 
 Helm wrapper chart for [Argo CD](https://argo-cd.readthedocs.io) (`argo-cd 7.8.2`),
 the GitOps controller that manages every other Helm chart in this repo
-(see `../../argocd-apps/`).
+(see `../../apps/` and `../../root.yaml`).
 
 ## What it does
 
@@ -18,10 +18,10 @@ After this chart is installed (`make install-argocd`), apply the root
 "app of apps" once to have Argo CD start managing every other chart:
 
 ```bash
-kubectl apply -f argocd-apps/root.yaml
+kubectl apply -f root.yaml
 ```
 
-See `../../argocd-apps/README.md` for how each chart's Application is
+See `../../GITOPS.md` for how each chart's Application is
 structured and how to sync/pause/delete them individually.
 
 ## Access
