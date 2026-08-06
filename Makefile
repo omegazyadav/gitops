@@ -108,6 +108,10 @@ install-otel-node:
 		--dependency-update
 
 install-argocd:
+	kubectl create namespace $(NAMESPACE_ARGOCD) --dry-run=client -o yaml | kubectl apply -f -
+	kubectl -n $(NAMESPACE_ARGOCD) create secret generic argocd-repo-server-age-key \
+		--from-file=id_rsa=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) \
+		--dry-run=client -o yaml | kubectl apply -f -
 	helm upgrade --install argocd $(CHART_ARGOCD) \
 		--namespace $(NAMESPACE_ARGOCD) \
 		--create-namespace \
