@@ -1,25 +1,29 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: prometheus
+  name: grafana
   namespace: argocd
   labels:
     tier: prometheus
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: helm/prometheus
+    path: helm/grafana
     helm:
       valueFiles:
         - values.yaml
+        - secrets://secrets.enc.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: grafana
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

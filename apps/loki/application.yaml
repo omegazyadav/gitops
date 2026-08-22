@@ -1,28 +1,28 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: iris-api
+  name: loki
   namespace: argocd
   labels:
-    tier: iris-api
+    tier: otel
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
-    repoURL: https://github.com/omegazyadav/mlops.git
+    repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: helm/iris-api
+    path: helm/loki
     helm:
       valueFiles:
         - values.yaml
-      values: |
-        namespace:
-          create: false
   destination:
     server: https://kubernetes.default.svc
-    namespace: mlops
+    namespace: loki
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

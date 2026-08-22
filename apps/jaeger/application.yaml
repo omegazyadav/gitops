@@ -1,25 +1,28 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: otel-node
+  name: jaeger
   namespace: argocd
   labels:
     tier: otel
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: helm/otel-node
+    path: helm/jaeger
     helm:
       valueFiles:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: jaeger
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

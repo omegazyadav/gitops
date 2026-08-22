@@ -116,21 +116,26 @@ install-argocd:
 		--create-namespace \
 		--dependency-update
 
-argocd-list:
-	argocd app list -l tier=core
-	argocd app list
+bootstrap:
+	kubectl apply -f root.yaml
 
-argocd-sync-core:
-	argocd app sync -l tier=core
+install-app:
+	kubectl apply -f apps/$(APP)/application.yaml
 
-argocd-sync-tier:
-	argocd app sync -l tier=$(TIER)
-
-argocd-sync-app:
-	argocd app sync $(APP)
-
-argocd-stop-app:
+uninstall-app:
 	argocd app delete $(APP) --cascade --yes
 
-argocd-stop-tier:
-	argocd app list -l tier=$(TIER) -o name | xargs -r -n1 argocd app delete --cascade --yes
+install-tier:
+	@for d in apps/*/; do \
+		if grep -q "tier: $(TIER)$$" $$d/application.yaml; then \
+			kubectl apply -f $$d/application.yaml; \
+		fi; \
+	done
+
+uninstall-tier:
+	@for d in apps/*/; do \
+		if grep -q "tier: $(TIER)$$" $$d/application.yaml; then \
+			name=$$(basename $$d); \
+			argocd app delete $$name --cascade --yes; \
+		fi; \
+	done

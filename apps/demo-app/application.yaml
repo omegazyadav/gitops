@@ -1,25 +1,31 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio
+  name: demo-app
   namespace: argocd
   labels:
-    tier: otel
+    tier: app
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   project: default
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: helm/minio
+    path: helm/demo-app
     helm:
       valueFiles:
         - values.yaml
+      values: |
+        istio:
+          enabled: true
   destination:
     server: https://kubernetes.default.svc
-    namespace: minio
+    namespace: default
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

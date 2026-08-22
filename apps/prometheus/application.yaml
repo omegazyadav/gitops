@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: jaeger
+  name: prometheus
   namespace: argocd
   labels:
-    tier: otel
+    tier: prometheus
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
@@ -12,14 +12,17 @@ spec:
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: helm/jaeger
+    path: helm/prometheus
     helm:
       valueFiles:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: jaeger
+    namespace: monitoring
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

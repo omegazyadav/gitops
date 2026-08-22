@@ -1,28 +1,28 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: demo-app
+  name: victoria-metrics
   namespace: argocd
   labels:
-    tier: app
+    tier: prometheus
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
     repoURL: https://github.com/omegazyadav/otel-demo.git
     targetRevision: main
-    path: helm/demo-app
+    path: helm/victoria-metrics
     helm:
       valueFiles:
         - values.yaml
-      values: |
-        istio:
-          enabled: true
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: monitoring
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
