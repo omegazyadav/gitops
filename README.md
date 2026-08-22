@@ -1,4 +1,4 @@
-# otel-stack
+# gitops
 
 A local Kubernetes observability stack (kind), deployed and managed via ArgoCD GitOps.
 
@@ -28,11 +28,11 @@ make create-cluster
 # 2. Install ArgoCD
 make install-argocd
 
-# 3. Bootstrap core (the "app of apps" + ingress)
-make bootstrap
+# 3. Install ingress (core)
+make install-app APP=ingress
 ```
 
-`root.yaml` is the "app of apps" — it only auto-discovers top-level `apps/*.yaml` files, and there aren't any by default, so it doesn't install anything on its own. `make bootstrap` explicitly applies `root.yaml` plus `apps/ingress/application.yaml`, since ingress is the one component you always want running. Everything else, under `apps/<name>/`, stays opt-in and uninstalled until you explicitly say so — no laptop-melting "install the whole stack" step.
+There's no "app of apps" root anymore — every component, including `ingress`, is just a folder under `apps/<name>/` that you install explicitly. Nothing is installed by default; you always choose what to bring up.
 
 Access the ArgoCD UI at `http://argocd.localhost:9999` (`admin` / initial password):
 ```bash
@@ -42,17 +42,15 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 
 ## GitOps structure: one folder per component, install-on-demand
 
-- `root.yaml` — the "app of apps" root `Application`. Watches `apps/` **non-recursively**, so it only sees top-level `.yaml` files, not files inside subfolders — by design, this means it never auto-installs any component.
-- `apps/<name>/application.yaml` — every component (including `ingress`), each its own standalone folder/entity. None of these exist on the cluster until you install them explicitly, either via `make bootstrap` (for `ingress`) or `make install-app`/`install-tier` (everything else). Each one carries `syncPolicy.automated` baked in, so once installed it's fully self-managing (no manual `argocd app sync` needed) until you uninstall it.
+- `apps/<name>/application.yaml` — every component (including `ingress`), each its own standalone folder/entity. None of these exist on the cluster until you install them explicitly via `make install-app`/`install-tier`. Each one carries `syncPolicy.automated` baked in, so once installed it's fully self-managing (no manual `argocd app sync` needed) until you uninstall it.
 
 This split decouples **install** (does the `Application` exist at all — an explicit, deliberate action) from **sync** (once installed, ArgoCD keeps it healthy automatically). Since every component lives in its own folder, you can install/remove exactly the ones you're experimenting with instead of all ~100s of charts at once. Related components still share a `tier: <name>` label (e.g. `prometheus`, `otel`, `istio`, `app`) so you can install/remove them together when useful, or one at a time.
 
 ### Makefile targets
 
 ```bash
-make bootstrap                       # apply root.yaml + install ingress (core)
 make argocd-list                     # what's installed (live Applications) + what's available in apps/
-make install-app APP=demo-app        # install a single component
+make install-app APP=ingress         # install a single component (e.g. core ingress)
 make uninstall-app APP=demo-app      # remove it (cascade-deletes its resources)
 make install-tier TIER=prometheus    # install every component labeled tier=prometheus
 make uninstall-tier TIER=prometheus  # remove every component labeled tier=prometheus

@@ -116,9 +116,6 @@ install-argocd:
 		--create-namespace \
 		--dependency-update
 
-bootstrap:
-	kubectl apply -f root.yaml
-
 install-app:
 	kubectl apply -f apps/$(APP)/application.yaml
 

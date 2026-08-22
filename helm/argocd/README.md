@@ -2,7 +2,7 @@
 
 Helm wrapper chart for [Argo CD](https://argo-cd.readthedocs.io) (`argo-cd 7.8.2`),
 the GitOps controller that manages every other Helm chart in this repo
-(see `../../apps/` and `../../root.yaml`).
+(see `../../apps/`).
 
 ## What it does
 
@@ -12,17 +12,19 @@ the GitOps controller that manages every other Helm chart in this repo
   (plain HTTP - `server.insecure: true` / `--insecure`, since this local
   kind cluster's nginx ingress doesn't terminate TLS).
 
-## Bootstrapping the rest of the stack
+## Installing the rest of the stack
 
-After this chart is installed (`make install-argocd`), apply the root
-"app of apps" once to have Argo CD start managing every other chart:
+After this chart is installed (`make install-argocd`), install whichever
+components you want explicitly — nothing is installed automatically:
 
 ```bash
-kubectl apply -f root.yaml
+make install-app APP=ingress   # core
+make install-app APP=demo-app  # or any other component
 ```
 
 See the root `../../README.md#gitops-structure` for how each chart's
-Application is structured and how to sync/pause/delete them individually.
+Application is structured and how to install/uninstall them individually
+or by tier.
 
 ## Access
 
