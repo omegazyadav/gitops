@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: demo-app
   namespace: argocd
+  labels:
+    tier: experiment
   annotations:
     argocd.argoproj.io/sync-wave: "3"
 spec:
@@ -21,9 +23,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: default
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

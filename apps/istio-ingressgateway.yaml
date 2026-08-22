@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: istio-ingressgateway
   namespace: argocd
+  labels:
+    tier: experiment
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
@@ -39,9 +41,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: istio-system
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

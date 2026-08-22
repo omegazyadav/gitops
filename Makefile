@@ -115,3 +115,10 @@ install-argocd:
 		--namespace $(NAMESPACE_ARGOCD) \
 		--create-namespace \
 		--dependency-update
+
+argocd-list:
+	argocd app list -l tier=core
+	argocd app list -l tier=experiment
+
+argocd-sync-core:
+	argocd app sync -l tier=core
