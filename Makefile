@@ -118,7 +118,19 @@ install-argocd:
 
 argocd-list:
 	argocd app list -l tier=core
-	argocd app list -l tier=experiment
+	argocd app list
 
 argocd-sync-core:
 	argocd app sync -l tier=core
+
+argocd-sync-tier:
+	argocd app sync -l tier=$(TIER)
+
+argocd-try:
+	argocd app sync $(APP)
+
+argocd-stop:
+	argocd app delete $(APP) --cascade --yes
+
+argocd-stop-tier:
+	argocd app list -l tier=$(TIER) -o name | xargs -r -n1 argocd app delete --cascade --yes

@@ -4,7 +4,7 @@ metadata:
   name: minio
   namespace: argocd
   labels:
-    tier: core
+    tier: otel
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
@@ -20,9 +20,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: minio
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

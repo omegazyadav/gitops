@@ -4,7 +4,7 @@ metadata:
   name: otel-cluster
   namespace: argocd
   labels:
-    tier: core
+    tier: otel
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
@@ -20,9 +20,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: monitoring
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
