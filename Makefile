@@ -126,10 +126,10 @@ argocd-sync-core:
 argocd-sync-tier:
 	argocd app sync -l tier=$(TIER)
 
-argocd-try:
+argocd-sync-app:
 	argocd app sync $(APP)
 
-argocd-stop:
+argocd-stop-app:
 	argocd app delete $(APP) --cascade --yes
 
 argocd-stop-tier:
