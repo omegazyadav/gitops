@@ -4,7 +4,7 @@ metadata:
   name: iris-api
   namespace: argocd
   labels:
-    tier: experiment
+    tier: iris-api
   annotations:
     argocd.argoproj.io/sync-wave: "3"
 spec:

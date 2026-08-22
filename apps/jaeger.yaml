@@ -4,7 +4,7 @@ metadata:
   name: jaeger
   namespace: argocd
   labels:
-    tier: core
+    tier: otel
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
@@ -20,9 +20,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: jaeger
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

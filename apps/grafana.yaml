@@ -4,7 +4,7 @@ metadata:
   name: grafana
   namespace: argocd
   labels:
-    tier: core
+    tier: prometheus
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
@@ -21,9 +21,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: grafana
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

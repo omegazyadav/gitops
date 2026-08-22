@@ -116,9 +116,40 @@ install-argocd:
 		--create-namespace \
 		--dependency-update
 
+# --- ArgoCD app selection ---
+# Baseline is argocd (bootstrapped via install-argocd, not an Application) +
+# ingress (tier: core, auto-synced). Everything else is registered by
+# root.yaml (app-of-apps) but left OutOfSync/manual, grouped by tier so you
+# can bring up a whole stack at once:
+#
+#   tier=prometheus  prometheus, victoria-metrics, grafana
+#   tier=otel        otel-cluster, otel-node, jaeger, loki, minio
+#   tier=istio       istio-base, istiod, istio-ingressgateway
+#   tier=app         demo-app, postgres
+#   tier=iris-api    iris-api
+#
+#   make argocd-list                  # see every registered app + status
+#   make argocd-sync-core             # (re)assert argocd+ingress baseline
+#   make argocd-sync-tier TIER=prometheus  # bring up a whole tier
+#   make argocd-try APP=grafana        # bring up one app
+#   make argocd-stop APP=grafana       # tear down one app's resources
+#   make argocd-stop-tier TIER=otel    # tear down a whole tier
+
 argocd-list:
 	argocd app list -l tier=core
-	argocd app list -l tier=experiment
+	argocd app list
 
 argocd-sync-core:
 	argocd app sync -l tier=core
+
+argocd-sync-tier:
+	argocd app sync -l tier=$(TIER)
+
+argocd-try:
+	argocd app sync $(APP)
+
+argocd-stop:
+	argocd app delete $(APP) --cascade --yes
+
+argocd-stop-tier:
+	argocd app list -l tier=$(TIER) -o name | xargs -r -n1 argocd app delete --cascade --yes
