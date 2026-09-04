@@ -1,6 +1,3 @@
-# Default values for mlmodel.
-# This is a YAML-formatted file. Declare variables to be substituted into templates.
-
 replicaCount: 2
 
 image:

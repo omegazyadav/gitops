@@ -19,6 +19,8 @@ spec:
       values: |
         namespace:
           create: false
+        image:
+          tag: sha-0e8fccc
   destination:
     server: https://kubernetes.default.svc
     namespace: mlops
