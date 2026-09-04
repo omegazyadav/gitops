@@ -4,7 +4,7 @@ image:
   repository: docker.io/omegazyadav/mlmodel
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "sha-0e8fccc"
+  tag: "sha-0645052"
 
 imagePullSecrets: []
 
