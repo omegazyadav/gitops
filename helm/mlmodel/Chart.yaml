@@ -1,0 +1,13 @@
+apiVersion: v2
+name: mlmodel
+description: Helm chart for the MLOps model inference API (FastAPI + scikit-learn)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - mlops
+  - fastapi
+  - scikit-learn
+home: https://github.com/omegazyadav/mlops
+maintainers:
+  - name: omegazyadav
