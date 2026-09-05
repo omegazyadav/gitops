@@ -1,0 +1,64 @@
+# Default values for mlmodel-ray.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Set create: false to deploy into a namespace managed outside this chart.
+namespace:
+  create: false
+  name: mlops
+
+image:
+  repository: docker.io/omegazyadav/mlmodel
+  # Must be a tag that has ray[serve] baked in (published from the mlops repo).
+  tag: "sha-dd3d4e0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# Must match the `ray` package version installed in the image.
+rayVersion: "2.58.0"
+
+# Ray Serve application config (rendered into RayService's serveConfigV2).
+serve:
+  appName: mlmodel
+  importPath: app.ray_serve:entrypoint
+  routePrefix: /
+  deploymentName: MLModelDeployment
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 4
+    targetOngoingRequests: 5
+
+env:
+  MODEL_PATH: /app/model/model.joblib
+  PYTHONPATH: /app
+
+head:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+  rayStartParams:
+    dashboard-host: "0.0.0.0"
+
+worker:
+  groupName: worker-group
+  replicas: 1
+  minReplicas: 1
+  maxReplicas: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+  rayStartParams: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,108 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: {{ include "mlmodel-ray.fullname" . }}
+  namespace: {{ include "mlmodel-ray.namespace" . }}
+  labels:
+    {{- include "mlmodel-ray.labels" . | nindent 4 }}
+spec:
+  serveConfigV2: |
+    applications:
+      - name: {{ .Values.serve.appName }}
+        import_path: {{ .Values.serve.importPath }}
+        route_prefix: {{ .Values.serve.routePrefix }}
+        deployments:
+          - name: {{ .Values.serve.deploymentName }}
+            autoscaling_config:
+              min_replicas: {{ .Values.serve.autoscaling.minReplicas }}
+              max_replicas: {{ .Values.serve.autoscaling.maxReplicas }}
+              target_ongoing_requests: {{ .Values.serve.autoscaling.targetOngoingRequests }}
+  rayClusterConfig:
+    rayVersion: {{ .Values.rayVersion | quote }}
+    headGroupSpec:
+      rayStartParams:
+        {{- toYaml .Values.head.rayStartParams | nindent 8 }}
+      template:
+        metadata:
+          labels:
+            {{- include "mlmodel-ray.selectorLabels" . | nindent 12 }}
+            ray.io/node-type: head
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+          containers:
+            - name: ray-head
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              workingDir: /app
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+                - containerPort: 8000
+                  name: serve
+              env:
+                {{- range $k, $v := .Values.env }}
+                - name: {{ $k }}
+                  value: {{ $v | quote }}
+                {{- end }}
+              resources:
+                {{- toYaml .Values.head.resources | nindent 16 }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+    workerGroupSpecs:
+      - groupName: {{ .Values.worker.groupName }}
+        replicas: {{ .Values.worker.replicas }}
+        minReplicas: {{ .Values.worker.minReplicas }}
+        maxReplicas: {{ .Values.worker.maxReplicas }}
+        rayStartParams:
+          {{- toYaml .Values.worker.rayStartParams | nindent 10 }}
+        template:
+          metadata:
+            labels:
+              {{- include "mlmodel-ray.selectorLabels" . | nindent 14 }}
+              ray.io/node-type: worker
+          spec:
+            {{- with .Values.imagePullSecrets }}
+            imagePullSecrets:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            containers:
+              - name: ray-worker
+                image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+                imagePullPolicy: {{ .Values.image.pullPolicy }}
+                workingDir: /app
+                env:
+                  {{- range $k, $v := .Values.env }}
+                  - name: {{ $k }}
+                    value: {{ $v | quote }}
+                  {{- end }}
+                resources:
+                  {{- toYaml .Values.worker.resources | nindent 18 }}
+            {{- with .Values.nodeSelector }}
+            nodeSelector:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.tolerations }}
+            tolerations:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.affinity }}
+            affinity:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
