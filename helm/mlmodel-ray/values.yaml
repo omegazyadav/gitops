@@ -25,6 +25,9 @@ serve:
   importPath: app.ray_serve:entrypoint
   routePrefix: /
   deploymentName: MLModelDeployment
+  # EveryNode runs a Serve HTTP proxy on every Ray node (required for KubeRay's
+  # default worker readiness probe, which checks localhost:8000/-/healthz).
+  proxyLocation: EveryNode
   autoscaling:
     minReplicas: 1
     maxReplicas: 4
