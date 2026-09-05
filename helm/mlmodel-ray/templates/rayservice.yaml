@@ -7,6 +7,7 @@ metadata:
     {{- include "mlmodel-ray.labels" . | nindent 4 }}
 spec:
   serveConfigV2: |
+    proxy_location: {{ .Values.serve.proxyLocation }}
     applications:
       - name: {{ .Values.serve.appName }}
         import_path: {{ .Values.serve.importPath }}
