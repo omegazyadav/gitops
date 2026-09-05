@@ -124,6 +124,22 @@ spec:
                   {{- end }}
                 resources:
                   {{- toYaml .Values.worker.resources | nindent 18 }}
+                # Overrides KubeRay's default worker readiness probe, which also checks the
+                # local Serve HTTP proxy (localhost:8000/-/healthz). Ray Serve only runs a
+                # proxy on nodes that host at least one replica, so an idle autoscaled worker
+                # with no replica would otherwise never become Ready. Readiness here only
+                # confirms the raylet itself is healthy.
+                readinessProbe:
+                  exec:
+                    command:
+                      - bash
+                      - -c
+                      - wget --tries=1 -T 2 -q -O- http://localhost:52365/api/local_raylet_healthz | grep success
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 2
+                  successThreshold: 1
+                  failureThreshold: 1
             {{- with .Values.nodeSelector }}
             nodeSelector:
               {{- toYaml . | nindent 14 }}
