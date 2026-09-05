@@ -45,6 +45,15 @@ head:
   rayStartParams:
     dashboard-host: "0.0.0.0"
 
+# Wires the Ray Dashboard's embedded Grafana panels + Prometheus queries.
+# grafanaHost is used server-side (by the Ray head) to validate Grafana is reachable
+# and to build panel query URLs; grafanaIframeHost is what the browser loads iframes from
+# (only needed if it differs from grafanaHost, e.g. behind an ingress).
+dashboard:
+  grafanaHost: http://grafana.grafana.svc.cluster.local:80
+  grafanaIframeHost: http://grafana.localhost:9999
+  prometheusHost: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+
 worker:
   groupName: worker-group
   replicas: 1
