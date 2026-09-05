@@ -54,7 +54,6 @@ dashboard:
   grafanaIframeHost: http://grafana.localhost:9999
   prometheusHost: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
 
-
 worker:
   groupName: worker-group
   replicas: 1
