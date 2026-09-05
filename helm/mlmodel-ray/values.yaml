@@ -11,7 +11,7 @@ namespace:
 image:
   repository: docker.io/omegazyadav/mlmodel
   # Must be a tag that has ray[serve] baked in (published from the mlops repo).
-  tag: "sha-dd3d4e0"
+  tag: "sha-803b541"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
