@@ -26,7 +26,8 @@ spec:
       template:
         metadata:
           labels:
-            {{- include "mlmodel-ray.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/name: kuberay
+            app.kubernetes.io/instance: {{ .Release.Name }}
             ray.io/node-type: head
           annotations:
             prometheus.io/scrape: "true"
