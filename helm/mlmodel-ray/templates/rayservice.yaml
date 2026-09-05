@@ -27,6 +27,10 @@ spec:
           labels:
             {{- include "mlmodel-ray.selectorLabels" . | nindent 12 }}
             ray.io/node-type: head
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/path: /metrics
+            prometheus.io/port: "8080"
         spec:
           {{- with .Values.imagePullSecrets }}
           imagePullSecrets:
@@ -50,10 +54,21 @@ spec:
                 - containerPort: 8000
                   name: serve
                   protocol: TCP
+                - containerPort: 8080
+                  name: metrics
+                  protocol: TCP
               env:
                 {{- range $k, $v := .Values.env }}
                 - name: {{ $k }}
                   value: {{ $v | quote }}
+                {{- end }}
+                {{- with .Values.dashboard }}
+                - name: RAY_GRAFANA_HOST
+                  value: {{ .grafanaHost | quote }}
+                - name: RAY_GRAFANA_IFRAME_HOST
+                  value: {{ .grafanaIframeHost | quote }}
+                - name: RAY_PROMETHEUS_HOST
+                  value: {{ .prometheusHost | quote }}
                 {{- end }}
               resources:
                 {{- toYaml .Values.head.resources | nindent 16 }}
@@ -83,6 +98,10 @@ spec:
             labels:
               {{- include "mlmodel-ray.selectorLabels" . | nindent 14 }}
               ray.io/node-type: worker
+            annotations:
+              prometheus.io/scrape: "true"
+              prometheus.io/path: /metrics
+              prometheus.io/port: "8080"
           spec:
             {{- with .Values.imagePullSecrets }}
             imagePullSecrets:
@@ -93,6 +112,10 @@ spec:
                 image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
                 imagePullPolicy: {{ .Values.image.pullPolicy }}
                 workingDir: /app
+                ports:
+                  - containerPort: 8080
+                    name: metrics
+                    protocol: TCP
                 env:
                   {{- range $k, $v := .Values.env }}
                   - name: {{ $k }}
