@@ -4,7 +4,7 @@ githubOAuth:
 
 grafana:
   rbac:
-    create: false
+    create: true
   adminPassword: changeme
 
   ingress:
