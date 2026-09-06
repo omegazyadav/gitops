@@ -1,70 +1,73 @@
-prometheus:
-  enabled: true
-
-  ingress:
+kube-prometheus-stack:
+  prometheus:
     enabled: true
-    hosts:
-      - prometheus.localhost
-    pathType: Prefix
 
-  prometheusSpec:
-    retention: 3d
+    ingress:
+      enabled: true
+      hosts:
+        - prometheus.localhost
+      pathType: Prefix
 
-    externalLabels:
-      cluster: local
+    prometheusSpec:
+      retention: 3d
 
+      enableOTLPReceiver: true
+
+      externalLabels:
+        cluster: local
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 800Mi
+        limits:
+          cpu: 500m
+          memory: 2Gi
+
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 1Gi
+
+  alertmanager:
+    enabled: true
+
+    alertmanagerSpec:
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 1Gi
+
+      resources:
+        requests:
+          cpu: 10m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
+
+  grafana:
+    enabled: false
+
+  kubeStateMetrics:
+    enabled: false
+
+  nodeExporter:
+    enabled: false
+
+  prometheusOperator:
     resources:
       requests:
-        cpu: 100m
-        memory: 800Mi
-      limits:
-        cpu: 500m
-        memory: 2Gi
-
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: standard
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 1Gi
-
-alertmanager:
-  enabled: true
-
-  alertmanagerSpec:
-    storage:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: standard
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 1Gi
-
-    resources:
-      requests:
-        cpu: 10m
+        cpu: 50m
         memory: 128Mi
       limits:
         cpu: 200m
-        memory: 512Mi
-
-grafana:
-  enabled: false
-
-kubeStateMetrics:
-  enabled: false
-
-nodeExporter:
-  enabled: false
-
-prometheusOperator:
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+        memory: 256Mi
