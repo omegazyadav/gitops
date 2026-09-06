@@ -36,7 +36,7 @@ mlflow:
             pathType: Prefix
 
   extraArgs:
-    workers: 2
+    workers: "2"
 
   resources:
     requests:
