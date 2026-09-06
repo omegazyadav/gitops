@@ -20,6 +20,10 @@ grafana:
     security:
       allow_embedding: true
 
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
+
     auth.github:
       enabled: true
       allow_sign_up: true
