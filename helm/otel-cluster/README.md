@@ -12,7 +12,7 @@ Helm wrapper chart for the [OpenTelemetry Collector](https://opentelemetry.io/do
 - Scrapes pod metrics via **annotation-based discovery** (`prometheus/apps` receiver): pods annotated with `prometheus.io/scrape: "true"` are auto-discovered.
 - Exports:
   - **Traces** → Jaeger (`jaeger.monitoring.svc.cluster.local:4317`) via OTLP/gRPC.
-  - **Metrics** → Prometheus (`prometheus-server.monitoring.svc.cluster.local`) via OTLP/HTTP.
+  - **Metrics** → Prometheus (`prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090`) via OTLP/HTTP.
 - Adds `environment=dev` and `k8s.cluster.name=test-cluster` resource attributes to all signals.
 - Memory limiter: 80% limit, 25% spike limit.
 

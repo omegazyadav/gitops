@@ -67,7 +67,7 @@ collector:
 
     exporters:
       otlphttp/prometheus:
-        endpoint: http://prometheus-server.monitoring.svc.cluster.local/api/v1/otlp
+        endpoint: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp
         tls:
           insecure: true
       otlphttp/loki:

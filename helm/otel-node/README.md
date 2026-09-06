@@ -12,7 +12,7 @@ Helm wrapper chart for the [OpenTelemetry Collector](https://opentelemetry.io/do
   - **logsCollection** (`filelog` receiver) — tails `/var/log/pods` on each node to collect all pod stdout/stderr logs. Collector's own logs are excluded to prevent a feedback loop.
 - All push-based ports (OTLP, Jaeger, Zipkin) are disabled — this collector is pull-only.
 - Exports:
-  - **Metrics** → Prometheus (`prometheus-server.monitoring.svc.cluster.local`) via OTLP/HTTP.
+  - **Metrics** → Prometheus (`prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090`) via OTLP/HTTP.
   - **Logs** → Loki (`loki-gateway.loki.svc.cluster.local`) via OTLP/HTTP.
 - Adds `environment=dev` and `k8s.cluster.name=test-cluster` resource attributes to all signals.
 - Memory limiter: 80% limit, 25% spike limit.
