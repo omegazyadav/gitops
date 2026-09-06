@@ -1,0 +1,44 @@
+mlflow:
+  replicaCount: 1
+
+  postgresql:
+    enabled: true
+    architecture: standalone
+    auth:
+      username: mlflow
+      password: mlflow-secret
+      database: mlflow
+    primary:
+      persistence:
+        enabled: true
+        storageClassName: standard
+        size: 2Gi
+
+  artifactRoot:
+    defaultArtifactRoot: /mlflow/artifacts
+
+  extraVolumes:
+    - name: mlflow-artifacts
+      persistentVolumeClaim:
+        claimName: mlflow-artifacts
+
+  extraVolumeMounts:
+    - name: mlflow-artifacts
+      mountPath: /mlflow/artifacts
+
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: mlflow.localhost
+        paths:
+          - path: /
+            pathType: Prefix
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
