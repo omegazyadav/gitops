@@ -35,6 +35,13 @@ mlflow:
           - path: /
             pathType: Prefix
 
+  serverAllowedHosts:
+    - mlflow.localhost
+    - "mlflow.localhost:9999"
+
+  corsAllowedOrigins:
+    - "http://mlflow.localhost:9999"
+
   extraArgs:
     workers: "2"
 
