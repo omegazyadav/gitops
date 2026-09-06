@@ -17,6 +17,9 @@ grafana:
     server:
       root_url: http://grafana.localhost:9999/
 
+    security:
+      allow_embedding: true
+
     auth.github:
       enabled: true
       allow_sign_up: true
