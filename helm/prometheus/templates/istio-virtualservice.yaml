@@ -1,0 +1,18 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - {{ .Values.istio.host }}
+  gateways:
+    - prometheus
+  http:
+    - route:
+        - destination:
+            host: prometheus-kube-prometheus-prometheus.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: 9090
+{{- end }}

@@ -1,0 +1,20 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "mlmodel.fullname" . }}
+  namespace: {{ include "mlmodel.namespace" . }}
+  labels:
+    {{- include "mlmodel.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - {{ .Values.istio.host }}
+  gateways:
+    - {{ include "mlmodel.fullname" . }}
+  http:
+    - route:
+        - destination:
+            host: {{ include "mlmodel.fullname" . }}.{{ include "mlmodel.namespace" . }}.svc.cluster.local
+            port:
+              number: {{ .Values.service.port }}
+{{- end }}

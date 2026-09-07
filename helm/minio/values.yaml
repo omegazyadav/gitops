@@ -11,7 +11,7 @@ minio:
     type: ClusterIP
 
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: nginx
     hosts:
       - minio.localhost
@@ -19,7 +19,7 @@ minio:
     pathType: Prefix
 
   consoleIngress:
-    enabled: true
+    enabled: false
     ingressClassName: nginx
     hosts:
       - minio-console.localhost
@@ -38,3 +38,8 @@ minio:
     - accessKey: loki
       secretKey: loki-secret
       policy: readwrite
+
+istio:
+  enabled: true
+  host: minio.localhost
+  consoleHost: minio-console.localhost

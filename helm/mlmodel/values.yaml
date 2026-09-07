@@ -90,3 +90,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+istio:
+  enabled: false
+  host: mlmodel.localhost

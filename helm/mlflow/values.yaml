@@ -27,7 +27,7 @@ mlflow:
       mountPath: /mlflow/artifacts
 
   ingress:
-    enabled: true
+    enabled: false
     className: nginx
     hosts:
       - host: mlflow.localhost
@@ -52,3 +52,7 @@ mlflow:
     limits:
       cpu: 1000m
       memory: 2Gi
+
+istio:
+  enabled: true
+  host: mlflow.localhost

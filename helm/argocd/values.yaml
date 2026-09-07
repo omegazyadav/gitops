@@ -7,7 +7,7 @@ argo-cd:
 
   server:
     ingress:
-      enabled: true
+      enabled: false
       ingressClassName: nginx
       hostname: argocd.localhost
 
@@ -75,3 +75,7 @@ argo-cd:
         volumeMounts:
           - name: custom-tools
             mountPath: /custom-tools
+
+istio:
+  enabled: true
+  host: argocd.localhost
