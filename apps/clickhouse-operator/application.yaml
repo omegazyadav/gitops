@@ -15,6 +15,30 @@ spec:
     path: dist/chart
     helm:
       releaseName: clickhouse-operator
+      values: |
+        extraManifests:
+          - |
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRole
+            metadata:
+              name: clickhouse-operator-networkpolicy-reader
+            rules:
+              - apiGroups: ["networking.k8s.io"]
+                resources: ["networkpolicies"]
+                verbs: ["get", "list", "watch"]
+          - |
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: clickhouse-operator-networkpolicy-reader
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: clickhouse-operator-networkpolicy-reader
+            subjects:
+              - kind: ServiceAccount
+                name: clickhouse-operator-controller-manager
+                namespace: clickhouse-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: clickhouse-operator
