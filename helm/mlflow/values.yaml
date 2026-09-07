@@ -37,10 +37,10 @@ mlflow:
 
   serverAllowedHosts:
     - mlflow.localhost
-    - "mlflow.localhost:9999"
+    - "mlflow.localhost:8080"
 
   corsAllowedOrigins:
-    - "http://mlflow.localhost:9999"
+    - "http://mlflow.localhost:8080"
 
   extraArgs:
     workers: "2"
