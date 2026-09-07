@@ -1,0 +1,21 @@
+keeper:
+  replicas: 1
+  image:
+    repository: clickhouse/clickhouse-keeper
+    tag: "25.12"
+
+server:
+  replicas: 2
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: "25.12"
+
+auth:
+  password: "changeme"
+
+resources:
+  requests:
+    cpu: "0.5"
+    memory: "512Mi"
+  limits:
+    memory: "1Gi"

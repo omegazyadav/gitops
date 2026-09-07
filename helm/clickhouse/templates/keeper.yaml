@@ -1,0 +1,15 @@
+---
+apiVersion: clickhouse.com/v1alpha1
+kind: KeeperCluster
+metadata:
+  name: {{ .Release.Name }}-keeper
+spec:
+  replicas: {{ .Values.keeper.replicas }}
+  containerTemplate:
+    image:
+      repository: {{ .Values.keeper.image.repository }}
+      tag: {{ .Values.keeper.image.tag | quote }}
+    {{- with .Values.resources }}
+    resources:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
