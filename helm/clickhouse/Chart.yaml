@@ -1,0 +1,6 @@
+apiVersion: v2
+name: clickhouse
+description: ClickHouseCluster + KeeperCluster custom resources, managed by the ClickHouse Operator
+type: application
+version: 0.1.0
+appVersion: "25.12"
