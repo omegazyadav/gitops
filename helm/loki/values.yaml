@@ -7,7 +7,7 @@ loki:
       configs:
         - from: "2024-04-01"
           store: tsdb
-          object_store: s3
+          object_store: filesystem
           schema: v13
           index:
             prefix: loki_index_
@@ -16,24 +16,10 @@ loki:
       tsdb_shipper:
         active_index_directory: /var/loki/index
         cache_location: /var/loki/index_cache
-      aws:
-        s3: http://loki:loki-secret@minio.minio.svc:9000/loki
-        s3forcepathstyle: true
+      filesystem:
+        directory: /var/loki/chunks
     storage:
-      type: s3
-      s3:
-        endpoint: minio.minio.svc:9000
-        accessKeyId: loki
-        secretAccessKey: loki-secret
-        insecure: true
-        s3ForcePathStyle: true
-      bucketNames:
-        chunks: loki
-        ruler: loki
-        admin: loki
-        # chunks: loki-chunks
-        # ruler: loki-ruler
-        # admin: loki-admin
+      type: filesystem
     pattern_ingester:
       enabled: true
     limits_config:
@@ -43,7 +29,7 @@ loki:
       retention_period: 360h # 14 days retention
     compactor:
       retention_enabled: true
-      delete_request_store: s3
+      delete_request_store: filesystem
     ruler:
       enable_api: true
 
