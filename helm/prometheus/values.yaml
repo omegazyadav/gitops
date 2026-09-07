@@ -3,7 +3,7 @@ kube-prometheus-stack:
     enabled: true
 
     ingress:
-      enabled: true
+      enabled: false
       hosts:
         - prometheus.localhost
       pathType: Prefix
@@ -71,3 +71,7 @@ kube-prometheus-stack:
       limits:
         cpu: 200m
         memory: 256Mi
+
+istio:
+  enabled: true
+  host: prometheus.localhost

@@ -2,13 +2,17 @@ githubOAuth:
   clientId: ""
   clientSecret: ""
 
+istio:
+  enabled: true
+  host: grafana.localhost
+
 grafana:
   rbac:
     create: true
   adminPassword: changeme
 
   ingress:
-    enabled: true
+    enabled: false
     hosts:
       - grafana.localhost
     pathType: Prefix

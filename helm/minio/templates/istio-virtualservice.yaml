@@ -1,0 +1,35 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: minio-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - {{ .Values.istio.host }}
+  gateways:
+    - minio
+  http:
+    - route:
+        - destination:
+            host: minio.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: 9000
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: minio-console
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - {{ .Values.istio.consoleHost }}
+  gateways:
+    - minio
+  http:
+    - route:
+        - destination:
+            host: minio-console.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: 9001
+{{- end }}

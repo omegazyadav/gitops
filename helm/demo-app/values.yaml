@@ -53,7 +53,7 @@ podAnnotations:
   prometheus.io/port: "8080"
 
 ingress:
-  enabled: true
+  enabled: false
   className: "nginx"
   annotations: {}
   host: demo-app.localhost
@@ -61,12 +61,8 @@ ingress:
   pathType: Prefix
   tls: []
 
-# Parallel Istio Gateway + VirtualService, routing to the same Service and
-# same host as the nginx Ingress above (differentiate by port: 9999 = nginx,
-# 8080 = Istio gateway). Kept disabled by default so nginx remains the sole
-# path unless explicitly turned on (see apps/demo-app.yaml for the override).
 istio:
-  enabled: false
+  enabled: true
   host: demo-app.localhost
 
 hpa:
