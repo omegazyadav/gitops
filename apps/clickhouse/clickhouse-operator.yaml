@@ -39,6 +39,28 @@ spec:
               - kind: ServiceAccount
                 name: clickhouse-operator-controller-manager
                 namespace: clickhouse-operator
+          - |
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRole
+            metadata:
+              name: clickhouse-operator-pod-status-writer
+            rules:
+              - apiGroups: [""]
+                resources: ["pods/status"]
+                verbs: ["get", "patch", "update"]
+          - |
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: clickhouse-operator-pod-status-writer
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: clickhouse-operator-pod-status-writer
+            subjects:
+              - kind: ServiceAccount
+                name: clickhouse-operator-controller-manager
+                namespace: clickhouse-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: clickhouse-operator
