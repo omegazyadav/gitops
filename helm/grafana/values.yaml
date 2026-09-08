@@ -2,6 +2,9 @@ githubOAuth:
   clientId: ""
   clientSecret: ""
 
+clickhouseDatasource:
+  password: ""
+
 istio:
   enabled: true
   host: grafana.localhost
@@ -54,6 +57,12 @@ grafana:
       defaultMode: 0440
       mountPath: /etc/secrets/github-oauth
       readOnly: true
+
+  envValueFrom:
+    CLICKHOUSE_PASSWORD:
+      secretKeyRef:
+        name: grafana-clickhouse
+        key: password
 
   resources:
     requests:
@@ -112,6 +121,9 @@ grafana:
             port: 9000
             protocol: native
             secure: false
+            username: mcp_service
+          secureJsonData:
+            password: ${CLICKHOUSE_PASSWORD}
 
   sidecar:
     dashboards:
