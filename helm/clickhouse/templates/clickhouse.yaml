@@ -27,3 +27,7 @@ spec:
         default:
           grants:
             - query: "GRANT ALL ON *.* WITH GRANT OPTION"
+        {{ .Values.mcpUser.username }}:
+          password_sha256_hex: {{ sha256sum .Values.mcpUser.password | quote }}
+          grants:
+            - query: "GRANT SELECT ON *.*"
