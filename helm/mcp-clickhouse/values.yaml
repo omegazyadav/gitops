@@ -1,0 +1,35 @@
+image:
+  repository: ghcr.io/clickhouse/mcp-clickhouse
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicas: 1
+
+clickhouse:
+  host: clickhouse-clickhouse-headless.clickhouse.svc.cluster.local
+  port: 8123
+  user: mcp_service
+  password: ""
+  secure: false
+  verify: false
+  allowWriteAccess: false
+  allowDrop: false
+
+auth:
+  # Static bearer token clients must send as `Authorization: Bearer <token>`.
+  # Real value supplied via secrets.enc.yaml (sops).
+  token: ""
+
+service:
+  port: 8000
+
+resources:
+  requests:
+    cpu: "0.1"
+    memory: "128Mi"
+  limits:
+    memory: "256Mi"
+
+istio:
+  enabled: true
+  host: mcp-clickhouse.localhost

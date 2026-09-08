@@ -1,25 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: clickhouse
+  name: mcp-clickhouse
   namespace: argocd
   labels:
     tier: clickhouse
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
     repoURL: https://github.com/omegazyadav/gitops.git
     targetRevision: main
-    path: helm/clickhouse
+    path: helm/mcp-clickhouse
     helm:
       valueFiles:
         - values.yaml
         - secrets://secrets.enc.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: clickhouse
+    namespace: mcp-clickhouse
   syncPolicy:
     automated:
       prune: true

@@ -4,3 +4,4 @@ resources:
   - cert-manager.yaml
   - clickhouse-operator.yaml
   - clickhouse.yaml
+  - mcp-clickhouse.yaml

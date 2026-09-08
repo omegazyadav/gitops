@@ -1,0 +1,6 @@
+apiVersion: v2
+name: mcp-clickhouse
+description: MCP server exposing ClickHouse tools (run_query, list_databases, list_tables) over HTTP
+type: application
+version: 0.1.0
+appVersion: "latest"
