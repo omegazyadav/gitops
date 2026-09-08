@@ -11,6 +11,9 @@ grafana:
     create: true
   adminPassword: changeme
 
+  plugins:
+    - grafana-clickhouse-datasource
+
   ingress:
     enabled: false
     hosts:
