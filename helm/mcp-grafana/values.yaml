@@ -10,7 +10,7 @@ grafana-mcp:
     - "-t"
     - "streamable-http"
     - "--enabled-tools"
-    - "clickhouse"
+    - "search,datasource,incident,prometheus,loki,alerting,dashboard,folder,oncall,asserts,sift,pyroscope,navigation,proxied,annotations,rendering,clickhouse"
 
   envValueFrom:
     MCP_GRAFANA_SERVER_TOKEN:
