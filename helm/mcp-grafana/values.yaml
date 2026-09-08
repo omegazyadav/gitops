@@ -1,0 +1,36 @@
+# Values for the upstream grafana-mcp subchart (https://github.com/grafana/helm-charts/tree/main/charts/grafana-mcp)
+grafana-mcp:
+  grafana:
+    url: http://grafana.grafana.svc.cluster.local
+    apiKeySecret:
+      name: mcp-grafana-credentials
+      key: apiKey
+
+  extraArgs:
+    - "-t"
+    - "streamable-http"
+    - "--enabled-tools"
+    - "clickhouse"
+
+  envValueFrom:
+    MCP_GRAFANA_SERVER_TOKEN:
+      secretKeyRef:
+        name: mcp-grafana-credentials
+        key: authToken
+
+  resources:
+    requests:
+      cpu: "0.1"
+      memory: "128Mi"
+    limits:
+      memory: "256Mi"
+
+# Grafana service account token + caller-auth bearer token.
+# Real values supplied via secrets.enc.yaml (sops).
+credentials:
+  apiKey: ""
+  authToken: ""
+
+istio:
+  enabled: true
+  host: mcp-grafana.localhost

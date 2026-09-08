@@ -1,0 +1,8 @@
+apiVersion: v2
+name: mcp-grafana
+description: Official Grafana MCP server, exposing tools to query connected datasources (Prometheus, Loki, ClickHouse, etc.) and manage dashboards/alerts via MCP
+version: 0.1.0
+dependencies:
+  - name: grafana-mcp
+    repository: https://grafana.github.io/helm-charts
+    version: 0.3.1
