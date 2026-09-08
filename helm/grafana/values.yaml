@@ -101,6 +101,17 @@ grafana:
               filterBySpanID: false
               customQuery: true
               query: '{namespace="default"} | json | trace_id="${__trace.traceId}"'
+        - name: Clickhouse
+          type: grafana-clickhouse-datasource
+          uid: clickhouse
+          isDefault: true
+          access: proxy
+          jsonData:
+            host: clickhouse-clickhouse-headless.clickhouse.svc.cluster.local
+            port: 9000
+            protocol: native
+            secure: false
+
   sidecar:
     dashboards:
       enabled: true
