@@ -15,7 +15,7 @@ auth:
 
 mcpUser:
   username: mcp_service
-  password: "changeme-mcp"
+  password: ""
 
 resources:
   requests:

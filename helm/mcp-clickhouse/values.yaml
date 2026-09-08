@@ -9,7 +9,7 @@ clickhouse:
   host: clickhouse-clickhouse-headless.clickhouse.svc.cluster.local
   port: 8123
   user: mcp_service
-  password: "changeme-mcp"
+  password: ""
   secure: false
   verify: false
   allowWriteAccess: false
@@ -17,7 +17,8 @@ clickhouse:
 
 auth:
   # Static bearer token clients must send as `Authorization: Bearer <token>`.
-  token: "changeme-mcp-token"
+  # Real value supplied via secrets.enc.yaml (sops).
+  token: ""
 
 service:
   port: 8000
