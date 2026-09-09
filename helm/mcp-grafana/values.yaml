@@ -16,6 +16,12 @@ grafana-mcp:
     - "--enabled-tools"
     - "search,datasource,incident,prometheus,loki,alerting,dashboard,folder,oncall,asserts,sift,pyroscope,navigation,proxied,annotations,rendering,clickhouse"
 
+  envValueFrom:
+    MCP_GRAFANA_SERVER_TOKEN:
+      secretKeyRef:
+        name: mcp-grafana-credentials
+        key: authToken
+
   resources:
     requests:
       cpu: "0.1"
@@ -23,10 +29,11 @@ grafana-mcp:
     limits:
       memory: "256Mi"
 
-# Grafana service account token.
-# Real value supplied via secrets.enc.yaml (sops).
+# Grafana service account token + caller-auth bearer token.
+# Real values supplied via secrets.enc.yaml (sops).
 credentials:
   apiKey: ""
+  authToken: ""
 
 istio:
   enabled: true
