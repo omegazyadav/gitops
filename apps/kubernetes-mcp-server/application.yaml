@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubernetes-mcp-server
+  namespace: argocd
+  labels:
+    tier: mcp
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    path: .
+    repoURL: oci://ghcr.io/containers/charts/kubernetes-mcp-server
+    targetRevision: 0.1.0
+    helm:
+      releaseName: kubernetes-mcp-server
+      valuesObject:
+        ingress:
+          enabled: false
+        rbac:
+          create: true
+          extraClusterRoleBindings:
+            - name: cluster-admin
+              roleRef:
+                name: cluster-admin
+                external: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mcp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
