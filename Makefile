@@ -37,7 +37,9 @@ delete-cluster:
 
 install: install-postgres install-demo-app install-ingress install-minio install-grafana install-prometheus install-jaeger install-otel-node install-otel-cluster install-victoria-metrics
 
-bootstrap: install-istio-base install-argocd
+bootstrap:
+	$(MAKE) install-argocd
+	$(MAKE) install-tier TIER=istio
 
 edit-secret:
 	SOPS_AGE_SSH_PRIVATE_KEY_FILE=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) sops $(FILE)
@@ -136,13 +138,6 @@ install-argocd: install-crds
 		--create-namespace \
 		--dependency-update
 	kubectl apply -f apps/argocd/application.yaml
-
-install-istio-base:
-	helm upgrade --install istio-base base \
-		--repo https://istio-release.storage.googleapis.com/charts \
-		--version 1.27.9 \
-		--namespace istio-system \
-		--create-namespace
 
 install-app:
 	kubectl apply -f apps/$(APP)/application.yaml
