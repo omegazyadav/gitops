@@ -1,31 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mlmodel-ray
+  name: kuberay
   namespace: argocd
   labels:
-    tier: mlmodel
-  annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    tier: kuberay
 spec:
   project: default
   source:
     repoURL: https://github.com/omegazyadav/gitops.git
     targetRevision: main
-    path: helm/mlmodel-ray
-    helm:
-      valueFiles:
-        - values.yaml
-      values: |
-        namespace:
-          create: false
+    path: apps/kuberay
   destination:
     server: https://kubernetes.default.svc
-    namespace: mlops
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
