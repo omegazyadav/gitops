@@ -9,15 +9,19 @@ spec:
   serveConfigV2: |
     proxy_location: {{ .Values.serve.proxyLocation }}
     applications:
-      - name: {{ .Values.serve.appName }}
-        import_path: {{ .Values.serve.importPath }}
-        route_prefix: {{ .Values.serve.routePrefix }}
+      {{- range .Values.serve.applications }}
+      - name: {{ .name }}
+        import_path: app.ray_serve:entrypoint
+        route_prefix: {{ .routePrefix }}
+        args:
+          model_path: {{ .modelPath }}
         deployments:
-          - name: {{ .Values.serve.deploymentName }}
+          - name: {{ .deploymentName }}
             autoscaling_config:
-              min_replicas: {{ .Values.serve.autoscaling.minReplicas }}
-              max_replicas: {{ .Values.serve.autoscaling.maxReplicas }}
-              target_ongoing_requests: {{ .Values.serve.autoscaling.targetOngoingRequests }}
+              min_replicas: {{ .autoscaling.minReplicas }}
+              max_replicas: {{ .autoscaling.maxReplicas }}
+              target_ongoing_requests: {{ .autoscaling.targetOngoingRequests }}
+      {{- end }}
   rayClusterConfig:
     rayVersion: {{ .Values.rayVersion | quote }}
     headGroupSpec:

@@ -10,8 +10,9 @@ namespace:
 
 image:
   repository: docker.io/omegazyadav/mlmodel
-  # Must be a tag that has ray[serve] baked in (published from the mlops repo).
-  tag: "sha-803b541"
+  # Must be a tag that has ray[serve] baked in, and the model artifacts each
+  # serve.applications[].modelPath below points at (published from the mlops repo).
+  tag: "sha-fb10a85"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -19,22 +20,44 @@ imagePullSecrets: []
 # Must match the `ray` package version installed in the image.
 rayVersion: "2.58.0"
 
-# Ray Serve application config (rendered into RayService's serveConfigV2).
+# Ray Serve config (rendered into RayService's serveConfigV2). Each entry in
+# `applications` is deployed as its own independent Serve application -
+# a different model, or a different version of the same model - every one
+# bound to app.ray_serve:entrypoint with its own model_path, route_prefix,
+# and autoscaling_config, so they scale independently of each other.
 serve:
-  appName: mlmodel
-  importPath: app.ray_serve:entrypoint
-  routePrefix: /
-  deploymentName: MLModelDeployment
   # EveryNode runs a Serve HTTP proxy on every Ray node (required for KubeRay's
   # default worker readiness probe, which checks localhost:8000/-/healthz).
   proxyLocation: EveryNode
-  autoscaling:
-    minReplicas: 1
-    maxReplicas: 4
-    targetOngoingRequests: 5
+  applications:
+    - name: random-forest-v1
+      modelPath: /app/model/model.joblib
+      routePrefix: /random-forest-v1
+      deploymentName: MLModelDeployment
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 4
+        targetOngoingRequests: 5
+    - name: random-forest-v2
+      modelPath: /app/model/random_forest-v2.joblib
+      routePrefix: /random-forest-v2
+      deploymentName: MLModelDeployment
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 4
+        targetOngoingRequests: 5
+    - name: logistic-regression-v1
+      modelPath: /app/model/logistic_regression-v1.joblib
+      routePrefix: /logistic-regression-v1
+      deploymentName: MLModelDeployment
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 2
+        targetOngoingRequests: 5
 
 env:
-  MODEL_PATH: /app/model/model.joblib
+  # MODEL_PATH is no longer used by app.ray_serve (model_path is now passed
+  # per-application via serve.applications[].modelPath -> args.model_path).
   PYTHONPATH: /app
 
 head:
@@ -74,3 +97,7 @@ worker:
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
+istio:
+  enabled: false
+  host: mlmodel-ray.localhost
