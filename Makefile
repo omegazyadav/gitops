@@ -25,6 +25,8 @@ CHART_OTEL_CLUSTER      := ./helm/otel-cluster/
 CHART_OTEL_NODE         := ./helm/otel-node/
 CHART_ARGOCD            := ./helm/argocd/
 
+ISTIO_VERSION           := 1.27.9
+
 SOPS_AGE_SSH_PRIVATE_KEY_FILE ?= $(HOME)/.ssh/id_rsa
 
 create-cluster:
@@ -108,7 +110,23 @@ install-otel-node:
 		--create-namespace \
 		--dependency-update
 
-install-argocd:
+# Istio's CRDs (Gateway/VirtualService/etc.) must exist before ArgoCD, since
+# ArgoCD's own chart optionally renders a Gateway/VirtualService for itself.
+# Applied directly (not via ArgoCD) to avoid the bootstrap chicken-and-egg:
+# ArgoCD is what would otherwise install Istio. The full Istio control plane
+# (istiod/ingressgateway) is still installed later, by ArgoCD, via
+# `make install-tier TIER=istio` — this only pre-seeds the CRDs.
+install-crds:
+	kubectl create namespace istio-system --dry-run=client -o yaml \
+		| kubectl label --local -f - istio-injection=enabled -o yaml \
+		| kubectl apply -f -
+	helm template istio-base base \
+		--repo https://istio-release.storage.googleapis.com/charts \
+		--version $(ISTIO_VERSION) \
+		--namespace istio-system \
+		| kubectl apply --server-side -f -
+
+install-argocd: install-crds
 	kubectl create namespace $(NAMESPACE_ARGOCD) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl -n $(NAMESPACE_ARGOCD) create secret generic argocd-repo-server-age-key \
 		--from-file=id_rsa=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) \
@@ -133,15 +151,21 @@ uninstall-app:
 
 install-tier:
 	@for d in apps/*/; do \
-		if grep -q "tier: $(TIER)$$" $$d/application.yaml; then \
-			kubectl apply -f $$d/application.yaml; \
-		fi; \
+		for f in $$d*.yaml; do \
+			[ "$$(basename $$f)" = "kustomization.yaml" ] && continue; \
+			if grep -q "tier: $(TIER)$$" $$f; then \
+				kubectl apply -f $$f; \
+			fi; \
+		done; \
 	done
 
 uninstall-tier:
 	@for d in apps/*/; do \
-		if grep -q "tier: $(TIER)$$" $$d/application.yaml; then \
-			name=$$(basename $$d); \
-			argocd app delete $$name --cascade --yes; \
-		fi; \
+		for f in $$d*.yaml; do \
+			[ "$$(basename $$f)" = "kustomization.yaml" ] && continue; \
+			if grep -q "tier: $(TIER)$$" $$f; then \
+				name=$$(grep "name:" $$f | head -1 | awk '{print $$2}'); \
+				argocd app delete $$name --cascade --yes; \
+			fi; \
+		done; \
 	done

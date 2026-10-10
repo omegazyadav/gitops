@@ -25,12 +25,22 @@ Every component is a Helm chart under `helm/<chart>`, each wired to ArgoCD via i
 # 1. Create the local kind cluster
 make create-cluster
 
-# 2. Install ArgoCD
+# 2. Install ArgoCD (also pre-seeds Istio's CRDs via `install-crds` - see below)
 make install-argocd
 
 # 3. Install ingress (core)
 make install-app APP=ingress
 ```
+
+`install-argocd` depends on `install-crds`, which applies Istio's `base`
+chart (CRDs only, via plain `helm template | kubectl apply`, not through
+ArgoCD) first. This breaks a bootstrap chicken-and-egg: ArgoCD's own chart
+can optionally expose itself via an Istio `Gateway`/`VirtualService`
+(`helm/argocd` → `istio.enabled`), which fails to render without Istio's
+CRDs already present — but Istio itself is normally installed *by* ArgoCD
+(`make install-tier TIER=istio`). `install-crds` only seeds the CRDs; the
+actual Istio control plane (`istiod`/`istio-ingressgateway`) still comes up
+later, managed by ArgoCD as usual.
 
 There's no "app of apps" root anymore — every component, including `ingress`, is just a folder under `apps/<name>/` that you install explicitly. Nothing is installed by default; you always choose what to bring up.
 
@@ -42,14 +52,13 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 
 ## GitOps structure: one folder per component, install-on-demand
 
-- `apps/<name>/application.yaml` — every component (including `ingress`), each its own standalone folder/entity. None of these exist on the cluster until you install them explicitly via `make install-app`/`install-tier`. Each one carries `syncPolicy.automated` baked in, so once installed it's fully self-managing (no manual `argocd app sync` needed) until you uninstall it.
+- `apps/<name>/application.yaml` — every component (including `ingress`), each its own standalone folder/entity. None of these exist on the cluster until you install them explicitly via `make install-app`/`install-tier`. Each one carries `syncPolicy.automated` baked in, so once installed it's fully self-managing (no manual `argocd app sync` needed) until you uninstall it. A folder may contain more than one Application file (e.g. `apps/istiod/` has `istio-base.yaml`, `istiod.yaml`, `istio-gateway.yaml`) — `make install-tier`/`uninstall-tier` picks up every non-`kustomization.yaml` file in each folder, not just `application.yaml`.
 
 This split decouples **install** (does the `Application` exist at all — an explicit, deliberate action) from **sync** (once installed, ArgoCD keeps it healthy automatically). Since every component lives in its own folder, you can install/remove exactly the ones you're experimenting with instead of all ~100s of charts at once. Related components still share a `tier: <name>` label (e.g. `prometheus`, `otel`, `istio`, `app`) so you can install/remove them together when useful, or one at a time.
 
 ### Makefile targets
 
 ```bash
-make argocd-list                     # what's installed (live Applications) + what's available in apps/
 make install-app APP=ingress         # install a single component (e.g. core ingress)
 make uninstall-app APP=demo-app      # remove it (cascade-deletes its resources)
 make install-tier TIER=prometheus    # install every component labeled tier=prometheus
@@ -60,7 +69,7 @@ To add a new chart: create `helm/<new-chart>/` and `apps/<new-chart>/application
 
 ## Istio (learning setup, runs alongside ingress-nginx)
 
-`apps/istio-base/application.yaml`, `apps/istiod/application.yaml`, and `apps/istio-ingressgateway/application.yaml` (all `tier: istio`, install with `make install-tier TIER=istio`) install the upstream Istio Helm charts into `istio-system` — nginx keeps handling its existing routes untouched. The Istio ingress gateway is exposed via NodePort `30080`/`30443`, mapped in `kind.yaml` to host ports `8080`/`8443` (separate from nginx's `9999`/`9443`).
+`apps/istiod/istio-base.yaml`, `apps/istiod/istiod.yaml`, and `apps/istiod/istio-gateway.yaml` (all `tier: istio`, install with `make install-tier TIER=istio`) install the upstream Istio Helm charts into `istio-system` — nginx keeps handling its existing routes untouched. The Istio ingress gateway is exposed via NodePort `30080`/`30443`, mapped in `kind.yaml` to host ports `8080`/`8443` (separate from nginx's `9999`/`9443`).
 
 `helm/demo-app` gets an additional `Gateway` + `VirtualService` (disabled by default via `istio.enabled: false`, turned on for `demo-app` in `apps/demo-app/application.yaml`) routing the **same host** (`demo-app.localhost`) the nginx `Ingress` already uses, to the same backend `Service`. The two paths are distinguished only by port.
 

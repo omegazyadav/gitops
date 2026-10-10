@@ -7,7 +7,7 @@ argo-cd:
 
   server:
     ingress:
-      enabled: false
+      enabled: true
       ingressClassName: nginx
       hostname: argocd.localhost
 
