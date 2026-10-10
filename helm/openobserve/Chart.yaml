@@ -1,0 +1,8 @@
+apiVersion: v2
+name: openobserve
+description: OpenObserve (logs/metrics/traces observability platform) test environment, running in minimal single-replica/local-disk mode
+version: 0.1.0
+dependencies:
+  - name: openobserve
+    repository: https://charts.openobserve.ai
+    version: 1.0.2

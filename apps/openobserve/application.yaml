@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openobserve
+  namespace: argocd
+  labels:
+    tier: observability
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/omegazyadav/gitops.git
+    targetRevision: main
+    path: helm/openobserve
+    helm:
+      valueFiles:
+        - values.yaml
+        - secrets://secrets.enc.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openobserve
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,63 @@
+# Values for the upstream openobserve/openobserve chart (https://github.com/openobserve/openobserve-helm-chart).
+# This is a minimal/test configuration: single replica per component, local-disk
+# storage instead of S3, sqlite metadata store instead of Postgres, no NATS HA,
+# no MinIO, OSS-only (no enterprise features). Not suitable for production.
+openobserve:
+  enterprise:
+    enabled: false
+
+  reportserver:
+    enabled: false
+
+  replicaCount:
+    ingester: 1
+    querier: 1
+    router: 1
+    scheduler: 1
+    alertquerier: 0
+    compactor: 1
+    reportserver: 0
+    o2ai: 0
+
+  config:
+    ZO_LOCAL_MODE: "true"
+    ZO_LOCAL_MODE_STORAGE: "disk"
+    ZO_META_STORE: "sqlite"
+
+  # Real root credentials supplied via secrets.enc.yaml (sops).
+  auth:
+    ZO_ROOT_USER_EMAIL: ""
+    ZO_ROOT_USER_PASSWORD: ""
+
+  postgres:
+    enabled: false
+
+  minio:
+    enabled: false
+
+  nats:
+    config:
+      cluster:
+        replicas: 1
+      jetstream:
+        fileStore:
+          pvc:
+            size: 5Gi
+
+  ingester:
+    persistence:
+      size: 10Gi
+  querier:
+    persistence:
+      size: 10Gi
+  scheduler:
+    persistence:
+      size: 10Gi
+  compactor:
+    persistence:
+      enabled: true
+      size: 10Gi
+
+istio:
+  enabled: true
+  host: openobserve.localhost
