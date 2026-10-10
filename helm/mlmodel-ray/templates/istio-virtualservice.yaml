@@ -1,0 +1,22 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "mlmodel-ray.fullname" . }}
+  namespace: {{ include "mlmodel-ray.namespace" . }}
+  labels:
+    {{- include "mlmodel-ray.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - {{ .Values.istio.host }}
+  gateways:
+    - {{ include "mlmodel-ray.fullname" . }}
+  http:
+    - route:
+        - destination:
+            # RayService auto-creates this Service (<name>-serve-svc) to front the
+            # Serve HTTP proxy; port 8000 is Ray Serve's fixed proxy port.
+            host: {{ include "mlmodel-ray.fullname" . }}-serve-svc.{{ include "mlmodel-ray.namespace" . }}.svc.cluster.local
+            port:
+              number: 8000
+{{- end }}
