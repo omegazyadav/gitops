@@ -135,6 +135,7 @@ install-argocd: install-crds
 		--namespace $(NAMESPACE_ARGOCD) \
 		--create-namespace \
 		--dependency-update
+	kubectl apply -f apps/argocd/application.yaml
 
 install-istio-base:
 	helm upgrade --install istio-base base \
