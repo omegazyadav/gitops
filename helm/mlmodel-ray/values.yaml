@@ -12,7 +12,7 @@ image:
   repository: docker.io/omegazyadav/mlmodel
   # Must be a tag that has ray[serve] baked in, and the model artifacts each
   # serve.applications[].modelPath below points at (published from the mlops repo).
-  tag: "sha-fb10a85"
+  tag: "sha-0a48d86"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
