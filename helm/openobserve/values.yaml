@@ -42,21 +42,21 @@ openobserve:
       jetstream:
         fileStore:
           pvc:
-            size: 5Gi
+            size: 2Gi
 
   ingester:
     persistence:
-      size: 10Gi
+      size: 2Gi
   querier:
     persistence:
-      size: 10Gi
+      size: 2Gi
   scheduler:
     persistence:
-      size: 10Gi
+      size: 2Gi
   compactor:
     persistence:
       enabled: true
-      size: 10Gi
+      size: 2Gi
 
 istio:
   enabled: true
