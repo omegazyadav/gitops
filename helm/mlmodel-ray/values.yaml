@@ -20,7 +20,7 @@ serve:
   proxyLocation: EveryNode
   applications:
     - name: random-forest-1-0-0
-      modelPath: /app/model/model.joblib
+      modelPath: /app/model/random_forest-1-0-0.joblib
       routePrefix: /random-forest-1-0-0
       deploymentName: MLModelDeployment
       autoscaling:
