@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kuberay
+  name: kuberay-operator
   namespace: argocd
   labels:
     tier: kuberay
@@ -10,13 +10,17 @@ spec:
   source:
     repoURL: https://github.com/omegazyadav/gitops.git
     targetRevision: main
-    path: apps/kuberay
+    path: helm/kuberay-operator
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: kuberay-operator
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

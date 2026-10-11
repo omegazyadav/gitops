@@ -13,7 +13,7 @@ delete-cluster:
 
 bootstrap:
 	$(MAKE) install-argocd
-	$(MAKE) install-tier TIER=istio
+	$(MAKE) install-tier TIER=bootstrap
 
 edit-secret:
 	SOPS_AGE_SSH_PRIVATE_KEY_FILE=$(SOPS_AGE_SSH_PRIVATE_KEY_FILE) sops $(FILE)
@@ -23,7 +23,7 @@ edit-secret:
 # Applied directly (not via ArgoCD) to avoid the bootstrap chicken-and-egg:
 # ArgoCD is what would otherwise install Istio. The full Istio control plane
 # (istiod/ingressgateway) is still installed later, by ArgoCD, via
-# `make install-tier TIER=istio` — this only pre-seeds the CRDs.
+# `make install-tier TIER=bootstrap` — this only pre-seeds the CRDs.
 install-crds:
 	kubectl create namespace istio-system --dry-run=client -o yaml \
 		| kubectl label --local -f - istio-injection=enabled -o yaml \
