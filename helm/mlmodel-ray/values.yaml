@@ -7,7 +7,7 @@ namespace:
 
 image:
   repository: docker.io/omegazyadav/mlmodel
-  tag: "sha-4b81bc3"
+  tag: "sha-541598a"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -22,6 +22,14 @@ serve:
     - name: random-forest-1-0-0
       modelPath: /app/model/model.joblib
       routePrefix: /random-forest-1-0-0
+      deploymentName: MLModelDeployment
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 4
+        targetOngoingRequests: 5
+    - name: random-forest-1-0-1
+      modelPath: /app/model/random_forest-1-0-1.joblib
+      routePrefix: /random-forest-1-0-1
       deploymentName: MLModelDeployment
       autoscaling:
         minReplicas: 1
