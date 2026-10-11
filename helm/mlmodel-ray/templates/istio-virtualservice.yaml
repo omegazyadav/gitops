@@ -8,15 +8,36 @@ metadata:
     {{- include "mlmodel-ray.labels" . | nindent 4 }}
 spec:
   hosts:
-    - {{ .Values.istio.host }}
+    {{- range .Values.serve.applications }}
+    - {{ .name }}.{{ $.Values.istio.host }}
+    {{- end }}
   gateways:
     - {{ include "mlmodel-ray.fullname" . }}
   http:
-    - route:
+    {{- range .Values.serve.applications }}
+    # Ray Serve itself dispatches by path (route_prefix), not by Host header, so each
+    # host-based match rewrites the URI to the app's internal route_prefix before
+    # forwarding to the shared Serve HTTP proxy. The uri prefix match ("/") is required
+    # for Istio to do a prefix-preserving rewrite (prepend route_prefix, keep the rest
+    # of the path, e.g. /predict -> /random-forest-1-0-0/predict) instead of replacing
+    # the whole path.
+    - name: {{ .name }}
+      match:
+        - authority:
+            # prefix (not exact) match: the Host header includes the port when a
+            # non-default port is used (e.g. :8080 for local kind access), and Istio's
+            # authority match is a literal string compare including any port suffix.
+            prefix: {{ .name }}.{{ $.Values.istio.host }}
+          uri:
+            prefix: /
+      rewrite:
+        uri: {{ .routePrefix }}/
+      route:
         - destination:
             # RayService auto-creates this Service (<name>-serve-svc) to front the
             # Serve HTTP proxy; port 8000 is Ray Serve's fixed proxy port.
-            host: {{ include "mlmodel-ray.fullname" . }}-serve-svc.{{ include "mlmodel-ray.namespace" . }}.svc.cluster.local
+            host: {{ include "mlmodel-ray.fullname" $ }}-serve-svc.{{ include "mlmodel-ray.namespace" $ }}.svc.cluster.local
             port:
               number: 8000
+    {{- end }}
 {{- end }}
