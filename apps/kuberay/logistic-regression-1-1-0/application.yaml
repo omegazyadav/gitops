@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mlmodel-ray-logistic-regression
+  name: mlmodel-ray-logistic-regression-1-1-0
   namespace: argocd
   labels:
     tier: kuberay
@@ -15,11 +15,15 @@ spec:
       valueFiles:
         - values.yaml
       values: |
-        fullnameOverride: mlmodel-ray-logistic-regression
+        fullnameOverride: mlmodel-ray-logistic-regression-1-1-0
         namespace:
           create: false
         istio:
           enabled: true
+          # Distinguishes this release's hostnames from logistic-regression-1-0-0's,
+          # e.g. logistic-regression-1-0-0-1-1-0.mlmodel-ray.localhost, so both
+          # releases can run side by side (canary/rollback) without collision.
+          hostSuffix: "1-1-0"
         serve:
           proxyLocation: EveryNode
           applications:
@@ -29,7 +33,7 @@ spec:
               deploymentName: MLModelDeployment
               autoscaling:
                 minReplicas: 1
-                maxReplicas: 2
+                maxReplicas: 3
                 targetOngoingRequests: 5
         # Single lightweight model on this cluster - smaller head/worker footprint
         # than the random-forest cluster, which hosts three serve apps.
