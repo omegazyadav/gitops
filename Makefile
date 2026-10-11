@@ -52,22 +52,16 @@ uninstall-app:
 	argocd app delete $(APP) --cascade --yes
 
 install-tier:
-	@for d in apps/*/; do \
-		for f in $$d*.yaml; do \
-			[ "$$(basename $$f)" = "kustomization.yaml" ] && continue; \
-			if grep -q "tier: $(TIER)$$" $$f; then \
-				kubectl apply -f $$f; \
-			fi; \
-		done; \
+	@find apps -name '*.yaml' ! -name 'kustomization.yaml' | while read -r f; do \
+		if grep -q "tier: $(TIER)$$" "$$f"; then \
+			kubectl apply -f "$$f"; \
+		fi; \
 	done
 
 uninstall-tier:
-	@for d in apps/*/; do \
-		for f in $$d*.yaml; do \
-			[ "$$(basename $$f)" = "kustomization.yaml" ] && continue; \
-			if grep -q "tier: $(TIER)$$" $$f; then \
-				name=$$(grep "name:" $$f | head -1 | awk '{print $$2}'); \
-				argocd app delete $$name --cascade --yes; \
-			fi; \
-		done; \
+	@find apps -name '*.yaml' ! -name 'kustomization.yaml' | while read -r f; do \
+		if grep -q "tier: $(TIER)$$" "$$f"; then \
+			name=$$(grep "name:" "$$f" | head -1 | awk '{print $$2}'); \
+			argocd app delete $$name --cascade --yes; \
+		fi; \
 	done
