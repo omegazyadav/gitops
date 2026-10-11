@@ -64,10 +64,10 @@ head:
   resources:
     requests:
       cpu: 500m
-      memory: 1Gi
+      memory: 2Gi
     limits:
       cpu: "1"
-      memory: 2Gi
+      memory: 4Gi
   rayStartParams:
     dashboard-host: "0.0.0.0"
 
