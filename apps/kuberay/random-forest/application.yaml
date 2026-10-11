@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: random-forest
+  name: mlmodel-ray-random-forest
   namespace: argocd
   labels:
     tier: kuberay
@@ -15,7 +15,7 @@ spec:
       valueFiles:
         - values.yaml
       values: |
-        fullnameOverride: random-forest
+        fullnameOverride: mlmodel-ray-random-forest
         namespace:
           create: false
         istio:

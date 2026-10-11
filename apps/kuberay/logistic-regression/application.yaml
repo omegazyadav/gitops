@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: logistic-regression
+  name: mlmodel-ray-logistic-regression
   namespace: argocd
   labels:
     tier: kuberay
@@ -15,7 +15,7 @@ spec:
       valueFiles:
         - values.yaml
       values: |
-        fullnameOverride: logistic-regression
+        fullnameOverride: mlmodel-ray-logistic-regression
         namespace:
           create: false
         istio:
