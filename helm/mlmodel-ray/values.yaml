@@ -1,54 +1,43 @@
-# Default values for mlmodel-ray.
-
 nameOverride: ""
 fullnameOverride: ""
 
-# Set create: false to deploy into a namespace managed outside this chart.
 namespace:
   create: false
   name: mlops
 
 image:
   repository: docker.io/omegazyadav/mlmodel
-  # Must be a tag that has ray[serve] baked in, and the model artifacts each
-  # serve.applications[].modelPath below points at (published from the mlops repo).
-  tag: "sha-0a48d86"
+  tag: "sha-4b81bc3"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
 
-# Must match the `ray` package version installed in the image.
 rayVersion: "2.58.0"
 
-# Ray Serve config (rendered into RayService's serveConfigV2). Each entry in
-# `applications` is deployed as its own independent Serve application -
-# a different model, or a different version of the same model - every one
-# bound to app.ray_serve:entrypoint with its own model_path, route_prefix,
-# and autoscaling_config, so they scale independently of each other.
 serve:
   # EveryNode runs a Serve HTTP proxy on every Ray node (required for KubeRay's
   # default worker readiness probe, which checks localhost:8000/-/healthz).
   proxyLocation: EveryNode
   applications:
-    - name: random-forest-v1
+    - name: random-forest-1-0-0
       modelPath: /app/model/model.joblib
-      routePrefix: /random-forest-v1
+      routePrefix: /random-forest-1-0-0
       deploymentName: MLModelDeployment
       autoscaling:
         minReplicas: 1
         maxReplicas: 4
         targetOngoingRequests: 5
-    - name: random-forest-v2
-      modelPath: /app/model/random_forest-v2.joblib
-      routePrefix: /random-forest-v2
+    - name: random-forest-2-0-0
+      modelPath: /app/model/random_forest-2-0-0.joblib
+      routePrefix: /random-forest-2-0-0
       deploymentName: MLModelDeployment
       autoscaling:
         minReplicas: 1
         maxReplicas: 4
         targetOngoingRequests: 5
-    - name: logistic-regression-v1
-      modelPath: /app/model/logistic_regression-v1.joblib
-      routePrefix: /logistic-regression-v1
+    - name: logistic-regression-1-0-0
+      modelPath: /app/model/logistic_regression-1-0-0.joblib
+      routePrefix: /logistic-regression-1-0-0
       deploymentName: MLModelDeployment
       autoscaling:
         minReplicas: 1
@@ -56,8 +45,6 @@ serve:
         targetOngoingRequests: 5
 
 env:
-  # MODEL_PATH is no longer used by app.ray_serve (model_path is now passed
-  # per-application via serve.applications[].modelPath -> args.model_path).
   PYTHONPATH: /app
 
 head:
