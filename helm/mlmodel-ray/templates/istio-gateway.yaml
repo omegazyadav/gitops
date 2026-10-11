@@ -16,6 +16,6 @@ spec:
         protocol: HTTP
       hosts:
         {{- range .Values.serve.applications }}
-        - {{ .name }}.{{ $.Values.istio.host }}
+        - {{ .name }}{{ if $.Values.istio.hostSuffix }}-{{ $.Values.istio.hostSuffix }}{{ end }}.{{ $.Values.istio.host }}
         {{- end }}
 {{- end }}

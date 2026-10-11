@@ -9,7 +9,7 @@ metadata:
 spec:
   hosts:
     {{- range .Values.serve.applications }}
-    - {{ .name }}.{{ $.Values.istio.host }}
+    - {{ .name }}{{ if $.Values.istio.hostSuffix }}-{{ $.Values.istio.hostSuffix }}{{ end }}.{{ $.Values.istio.host }}
     {{- end }}
   gateways:
     - {{ include "mlmodel-ray.fullname" . }}
@@ -27,7 +27,7 @@ spec:
             # prefix (not exact) match: the Host header includes the port when a
             # non-default port is used (e.g. :8080 for local kind access), and Istio's
             # authority match is a literal string compare including any port suffix.
-            prefix: {{ .name }}.{{ $.Values.istio.host }}
+            prefix: {{ .name }}{{ if $.Values.istio.hostSuffix }}-{{ $.Values.istio.hostSuffix }}{{ end }}.{{ $.Values.istio.host }}
           uri:
             prefix: /
       rewrite:
