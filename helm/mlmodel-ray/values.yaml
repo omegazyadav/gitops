@@ -30,25 +30,25 @@ serve:
   # default worker readiness probe, which checks localhost:8000/-/healthz).
   proxyLocation: EveryNode
   applications:
-    - name: random-forest-v1
+    - name: random-forest-1-0-0
       modelPath: /app/model/model.joblib
-      routePrefix: /random-forest-v1
+      routePrefix: /random-forest-1-0-0
       deploymentName: MLModelDeployment
       autoscaling:
         minReplicas: 1
         maxReplicas: 4
         targetOngoingRequests: 5
-    - name: random-forest-v2
-      modelPath: /app/model/random_forest-v2.joblib
-      routePrefix: /random-forest-v2
+    - name: random-forest-2-0-0
+      modelPath: /app/model/random_forest-2-0-0.joblib
+      routePrefix: /random-forest-2-0-0
       deploymentName: MLModelDeployment
       autoscaling:
         minReplicas: 1
         maxReplicas: 4
         targetOngoingRequests: 5
-    - name: logistic-regression-v1
-      modelPath: /app/model/logistic_regression-v1.joblib
-      routePrefix: /logistic-regression-v1
+    - name: logistic-regression-1-0-0
+      modelPath: /app/model/logistic_regression-1-0-0.joblib
+      routePrefix: /logistic-regression-1-0-0
       deploymentName: MLModelDeployment
       autoscaling:
         minReplicas: 1
